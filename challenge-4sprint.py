@@ -1,4 +1,18 @@
+from conexaoOracle.conexaodb import Conexaodb
+from models.usuario import Usuario
+from dao.usuario_dao import UsuarioDAO
+
 opcao = -1
+
+conexao = Conexaodb(
+        usuario="user",
+        senha="senha",
+        host="host",
+        porta=1521,
+        service_name="ORCL"
+    )
+
+usuario_dao = UsuarioDAO(conexao)
 
 while opcao != 0:
     print("\n===== Menu SoulUp Society =====")
@@ -12,3 +26,4 @@ while opcao != 0:
     except ValueError:
         print("Opção inválida. Digite apenas números.")
         continue
+    

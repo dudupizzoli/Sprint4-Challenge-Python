@@ -2,26 +2,33 @@ import oracledb
 
 class Conexaodb:
 
-    try:
-        dsnStr = oracledb.makedsn(
-            "oracle.fiap.com.br",
-            "1521",
-            "ORCL"
+    def __init__(self, usuario, senha, host, porta, service_name):
+        self.usuario = usuario
+        self.senha = senha
+        self.host = host
+        self.porta = porta
+        self.service_name = service_name
+
+        self.dsn = oracledb.makedsn(
+            host,
+            porta,
+            service_name=service_name
         )
 
-        #Conectando-se ao banco de dados
-        conn = oracledb.connect(     
-            user="USUARIO",
-            password="SENHA",
-            dsn=dsnStr
-        )
+    def conectar(self):
+        try:
+            conn = oracledb.connect(
+                user=self.usuario,
+                password=self.senha,
+                dsn=self.dsn
+            )
+            return conn
 
-        #Criando o cursor para realizar as operações do CRUD
-        cursor = conn.cursor()
-    except Exception as e:
-        print("Ocorreu um erro: ", e)
+        except oracledb.Error as erro:
+            print("Erro ao se conectar ao Oracle:", erro)
+            return None
 
-     
 
+        
 
 
