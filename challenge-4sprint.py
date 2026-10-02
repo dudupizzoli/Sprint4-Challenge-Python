@@ -4,15 +4,6 @@ from dao.usuario_dao import UsuarioDAO
 
 opcao = -1
 
-conexao = Conexaodb(
-        usuario="user",
-        senha="senha",
-        host="host",
-        porta=1521,
-        service_name="ORCL"
-    )
-
-usuario_dao = UsuarioDAO(conexao)
 
 while opcao != 0:
     print("\n===== Menu SoulUp Society =====")

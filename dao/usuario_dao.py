@@ -1,8 +1,16 @@
+from conexaoOracle.conexaodb import Conexaodb
 import oracledb
-
 class UsuarioDAO:
     def __init__(self, conexao):
         self.conexao = conexao
+
+    conexao = Conexaodb(
+            usuario="user",
+            senha="senha",
+            host="host",
+            porta=1521,
+            service_name="ORCL"
+        )
 
     def cadastrar_usuario(self, usuario):
         conn = self.conexao.conectar()
