@@ -12,7 +12,7 @@ def validar_texto(mensagem):
         else:
             print("O campo não pode ficar em branco.")
             
-
+usuario_atual = None
 login = False
 opcao_login = -1
 
@@ -32,16 +32,41 @@ while not login:
         case 1:
             try:
                 username = validar_texto("Digite seu nome de usuário: ")
-                senha = validar_texto("Sua senha precisa conter ao menos 4 caracteres e não pode ter espaços. Digite sua senha: ")
                 email = validar_texto("Digite seu email: ")
+                senha = validar_texto("Sua senha precisa conter ao menos 4 caracteres e não pode ter espaços. Digite sua senha: ")
                 if len(senha) < 4 or " " in senha:
                     raise ValueError("Sua senha precisa ter ao menos 4 caracteres e nenhum espaço.")
                 if "@" not in email or len(email) < 8:
                     raise ValueError("O email precisa ter @ e não pode ter menos de 8 caracteres.")
                 novo_usuario = Usuario(username, senha, email)
-                user_dao.cadastrar_usuario(novo_usuario)               
+                user_dao.cadastrar_usuario(novo_usuario)
+
+                usuario_atual = novo_usuario
+                print("Agora você está logado com: ", usuario_atual._username)     
+                login = True          
             except ValueError as erro:
                 print("Ocorreu um erro: ", erro)
+
+        case 2:
+                try:
+                    email = validar_texto("Digite seu email: ")
+                    senha = validar_texto("Sua senha precisa conter ao menos 4 caracteres e não pode ter espaços. Digite sua senha: ")
+                    if len(senha) < 4 or " " in senha:
+                        raise ValueError("Sua senha precisa ter ao menos 4 caracteres e nenhum espaço.")
+                    if "@" not in email or len(email) < 8:
+                        raise ValueError("O email precisa ter @ e não pode ter menos de 8 caracteres.")
+                    usuario_validado = user_dao.validar_login(email, senha)
+
+                    if usuario_validado is None:
+                        raise ValueError("Email ou senha incorretos.")        
+                    else: 
+                        usuario_atual = usuario_validado
+                        login = True
+                        print("O login foi efetuado com sucesso!")
+                        print("Agora você está logado com: ", usuario_atual._username)  
+
+                except ValueError as erro:
+                    print("Ocorreu um erro: ", erro)
 
 
 opcao = -1

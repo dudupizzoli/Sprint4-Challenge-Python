@@ -1,16 +1,16 @@
 class Usuario:
     #Construtor da classe Usuario
     #Pontos possuem um valor alto apenas para fins de teste. No sistema real  a conta começaria com 0 pontos
-    def __init__(self, username, senha_user, email_user, pontos=15000, passagens=0, saldo=0, vales=0, limite=10):
-        self._id_usuario = None,
-        self._username = username,
-        self._senha_user = senha_user,
-        self._email_user = email_user,
-        self._pontos = pontos, 
-        self._passagens = passagens,
-        self._vales = vales,
-        self._saldo = saldo,
-        self._limite = limite,
+    def __init__(self, username, senha_user, email_user, pontos=15000, passagens=0, saldo=0, vales=0, limite=10, id_usuario=None):
+        self._id_usuario = id_usuario
+        self._username = username
+        self._senha_user = senha_user
+        self._email_user = email_user
+        self._pontos = pontos
+        self._passagens = passagens
+        self._vales = vales
+        self._saldo = saldo
+        self._limite = limite
         self._missoes = []
         
 

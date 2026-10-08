@@ -1,4 +1,5 @@
 from conexaoOracle.conexaodb import Conexaodb
+from models.usuario import Usuario
 import oracledb
 
 #O QUE FAZER AGORA: cuidar da exportação dos dados para JSON, fazer o menu e toda a solução funcionar de fato, fazer o html, testar
@@ -55,16 +56,17 @@ class UsuarioDAO:
             if len(usuarios) == 0:
                 print("Nenhum usuário foi cadastrado.")
             else:
-                for usuario in usuarios:
-                    print("\n========================")
-                    print("ID do usuário: ", usuario[0])
-                    print("Username: ", usuario[1])
-                    print("Email: ", usuario[3])
-                    print("Qntd. de pontos: ", usuario[4])
-                    print("Qntd. de passagens: ", usuario[5])
-                    print("Qntd. de vales: ", usuario[6])
-                    print("Saldo: ", usuario[7])
-                    print("Limite: ", usuario[8])
+                return usuarios
+                # for usuario in usuarios:
+                #     print("\n========================")
+                #     print("ID do usuário: ", usuario[0])
+                #     print("Username: ", usuario[1])
+                #     print("Email: ", usuario[3])
+                #     print("Qntd. de pontos: ", usuario[4])
+                #     print("Qntd. de passagens: ", usuario[5])
+                #     print("Qntd. de vales: ", usuario[6])
+                #     print("Saldo: ", usuario[7])
+                #     print("Limite: ", usuario[8])
 
         except oracledb.Error as erro:
             print("Houve um erro: ", erro)
@@ -223,4 +225,34 @@ class UsuarioDAO:
                 return "Senha incorreta. Não foi possível excluir o usuário."
         else:
             return "A exclusão foi cancelada com sucesso!"
+
+    def validar_login(self, email, senha):
+        conn = self.conexao.conectar()
+        if conn is None:
+            return "Erro ao conectar ao Oracle." 
+        
+        cursor = conn.cursor()
+        sql = """
+            select id_usuario, username, senha, email, pontos, passagens, vales, saldo, limite from usuarios_soulup
+            where email = :email and senha = :senha
+            """
+
+        try:
+            cursor.execute(sql, {
+                "email": email,
+                "senha": senha
+            })
+            usuario_validado = cursor.fetchone()
+
+            usuario = Usuario(usuario_validado[1], usuario_validado[2], usuario_validado[3], usuario_validado[4], usuario_validado[5], 
+                              usuario_validado[6], usuario_validado[7], usuario_validado[8], usuario_validado[0])
+
+            return usuario
+
+        except oracledb.Error as erro:
+            print("Houve um erro: ", erro)
+        
+        finally:
+            cursor.close()
+            conn.close()     
 
