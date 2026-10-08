@@ -57,16 +57,6 @@ class UsuarioDAO:
                 print("Nenhum usuário foi cadastrado.")
             else:
                 return usuarios
-                # for usuario in usuarios:
-                #     print("\n========================")
-                #     print("ID do usuário: ", usuario[0])
-                #     print("Username: ", usuario[1])
-                #     print("Email: ", usuario[3])
-                #     print("Qntd. de pontos: ", usuario[4])
-                #     print("Qntd. de passagens: ", usuario[5])
-                #     print("Qntd. de vales: ", usuario[6])
-                #     print("Saldo: ", usuario[7])
-                #     print("Limite: ", usuario[8])
 
         except oracledb.Error as erro:
             print("Houve um erro: ", erro)
@@ -76,16 +66,16 @@ class UsuarioDAO:
             cursor.close()
             conn.close()            
 
-    def buscar_id_usuario(self, id_usuario):
+    def buscar_nome_usuario(self, username):
         conn = self.conexao.conectar()
         if conn is None:
             return "Erro ao conectar ao Oracle." 
         
         cursor = conn.cursor()
-        sql = """select id_usuario, username, senha, email, pontos, passagens, vales, saldo, limite from usuarios_soulup where id_usuario = :id_usuario"""
+        sql = """select id_usuario, username, senha, email, pontos, passagens, vales, saldo, limite from usuarios_soulup where username = :username"""
 
         try:
-            cursor.execute(sql, id_usuario = id_usuario)
+            cursor.execute(sql, username =username)
             usuario = cursor.fetchone()
             if usuario is None:
                 print("Nenhum usuário foi encontrado.")
@@ -107,6 +97,7 @@ class UsuarioDAO:
             cursor.close()
             conn.close()
 
+    #troquei o parâmetro do método acima. avaliar se vou trocar dos de baixo tbm
     def editar_usuario(self, id_usuario):    
         conn = self.conexao.conectar()
         if conn is None:
