@@ -47,7 +47,7 @@ class UsuarioDAO:
             return "Erro ao conectar ao Oracle." 
 
         cursor = conn.cursor()
-        sql = """select * from usuarios_soulup order by id_usuario"""
+        sql = """select id_usuario, username, senha, email, pontos, passagens, vales, saldo, limite from usuarios_soulup order by id_usuario"""
 
         try:
             cursor.execute(sql)
@@ -80,7 +80,7 @@ class UsuarioDAO:
             return "Erro ao conectar ao Oracle." 
         
         cursor = conn.cursor()
-        sql = """select * from usuarios_soulup where id_usuario = :id_usuario"""
+        sql = """select id_usuario, username, senha, email, pontos, passagens, vales, saldo, limite from usuarios_soulup where id_usuario = :id_usuario"""
 
         try:
             cursor.execute(sql, id_usuario = id_usuario)
@@ -105,14 +105,10 @@ class UsuarioDAO:
             cursor.close()
             conn.close()
 
-    def editar_usuario(self):    
+    def editar_usuario(self, id_usuario):    
         conn = self.conexao.conectar()
         if conn is None:
             return "Erro ao conectar ao Oracle." 
-
-        id_usuario = int(input("Digite o ID do usuário que você deseja editar: "))
-        if id_usuario < 0:
-            return "O ID precisa ser um número positivo. Digite um ID válido."
 
         cursor = conn.cursor()
         sql = """select * from usuarios_soulup where id_usuario = :id_usuario"""
@@ -138,11 +134,14 @@ class UsuarioDAO:
             if conn is None:
                 return "Erro ao conectar ao Oracle."
 
-            username = input(f"Seu nome de usuário atual é: {usuario[1]}, caso não queira mudá-lo, apenas digite seu nome de usuário atual novamente. Digite seu novo nome de usuário: ").strip()
-            email = input(f"Seu email atual é: {usuario[3]}, caso não queira mudá-lo, apenas digite seu email atual novamente. Digite seu novo email: ").strip()
+            username = input(f"Seu nome de usuário atual é: {usuario[1]}, caso não queira mudá-lo, aperte enter. Digite seu novo nome de usuário: ").strip()
+            email = input(f"Seu email atual é: {usuario[3]}, caso não queira mudá-lo, aperte enter. Digite seu novo email: ").strip()
 
-            if username == '' or email == '':
-                return "Não foi possível realizar nenhuma alteração pois nenhum texto foi inserido em um ou mais campos."
+            if username == '':
+                username = usuario[1]
+            
+            if email == '':
+                email = usuario[3]
 
             cursor = conn.cursor()
             sql = """update usuarios_soulup 
@@ -164,17 +163,13 @@ class UsuarioDAO:
         else:
             print("Senha incorreta. Não foi possível editar o usuário.")
 
-    def excluir_usuario(self):
+    def excluir_usuario(self, id_usuario):
         conn = self.conexao.conectar()
         if conn is None:
             return "Erro ao conectar ao Oracle." 
 
-        id_usuario = int(input("Digite o ID do usuário que você deseja excluir: "))
-        if id_usuario < 0:
-            return "O ID precisa ser um número positivo. Digite um ID válido."
-
         cursor = conn.cursor()
-        sql = """select * from usuarios_soulup where id_usuario = :id_usuario"""
+        sql = """select id_usuario, username, senha, email, pontos, passagens, vales, saldo, limite from usuarios_soulup where id_usuario = :id_usuario"""
 
         try:
             cursor.execute(sql, id_usuario=id_usuario)
@@ -200,7 +195,9 @@ class UsuarioDAO:
             conn.close() 
 
         confirmacao = input("A exclusão de uma conta é uma ação perigosa e potencialmente irreversível. Você realmente deseja excluir esta conta? (S para Sim/N para Não)").upper().strip()
-        if confirmacao == "S":
+        if confirmacao == "N":
+            return "A exclusão foi cancelada com sucesso!"
+        elif confirmacao == "S":
             senha = input("Digite a senha da conta a ser excluída: ").strip()
 
             if senha == usuario[2]:
@@ -223,7 +220,7 @@ class UsuarioDAO:
                     conn.close()
 
             else:
-                print("Senha incorreta. Não foi possível excluir o usuário.")
+                return "Senha incorreta. Não foi possível excluir o usuário."
         else:
-            print("A exclusão foi cancelada com sucesso!")
+            return "A exclusão foi cancelada com sucesso!"
 
