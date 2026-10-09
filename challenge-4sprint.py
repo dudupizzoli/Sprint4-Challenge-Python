@@ -110,12 +110,14 @@ while opcao != 0:
         case 4:
             while True:    #Submenu do sistema - trata sobre as contas do usuário | Aqui se encontra um CRUD
                 print("\n======= Menu SoulUp Society - Usuário =======")
-                print("1 - Cadastrar nova conta.") #Create
-                print("2 - Ver contas cadastradas.") #Read
-                print("3 - Procurar conta pelo nome de usuário.")
-                print("4 - Editar nome de usuário.") #Update
-                print("5 - Remover conta.") #Delete
-                print("6 - Voltar.") #Voltar ao menu principal
+                print("1 - Conferir conta atual.") #Confere a conta logada atualmente
+                print("2 - Logar em outra conta.") #Faz o login em outra conta
+                print("3 - Cadastrar nova conta.") #Create
+                print("4 - Ver contas cadastradas.") #Read
+                print("5 - Procurar conta pelo nome de usuário.")#Read
+                print("6 - Editar nome de usuário e email.") #Update
+                print("7 - Remover conta.") #Delete
+                print("8 - Voltar.") #Voltar ao menu principal
                 try:
                     opcao_user = int(input("Digite o número da opção que você deseja: "))
                 except ValueError:
@@ -123,22 +125,56 @@ while opcao != 0:
                     continue
                 match opcao_user:
                     case 1:
+                        print("\n=== Conta Logada Atualmente ===")
+                        print("ID do usuário: ", usuario_atual._id_usuario)
+                        print("Username: ", usuario_atual._username)
+                        print("Email: ", usuario_atual._email_user)
+                        print("Qntd. de pontos: ", usuario_atual._pontos)
+                        print("Qntd. de passagens: ", usuario_atual._passagens)
+                        print("Qntd. de vales: ", usuario_atual._vales)
+                        print("Saldo: ", usuario_atual._saldo)
+                        print("Limite: ", usuario_atual._limite)
+
+                    case 2:
+                            try:
+                                email = validar_texto("Digite seu email: ")
+                                senha = validar_texto("Sua senha precisa conter ao menos 4 caracteres e não pode ter espaços. Digite sua senha: ")
+                                if len(senha) < 4 or " " in senha:
+                                    raise ValueError("Sua senha precisa ter ao menos 4 caracteres e nenhum espaço.")
+                                if "@" not in email or len(email) < 8:
+                                    raise ValueError("O email precisa ter @ e não pode ter menos de 8 caracteres.")
+                                usuario_validado = user_dao.validar_login(email, senha)
+
+                                if usuario_validado is None:
+                                    raise ValueError("Email ou senha incorretos.")        
+                                else: 
+                                    usuario_atual = usuario_validado
+                                    print("O login foi efetuado com sucesso!")
+                                    print("Agora você está logado com: ", usuario_atual._username)  
+
+                            except ValueError as erro:
+                                print("Ocorreu um erro: ", erro)
+                    
+
+                    case 3:
                         try:
                             username = validar_texto("Digite seu nome de usuário: ")
                             email = validar_texto("Digite seu email: ")
                             senha = validar_texto("Sua senha precisa conter ao menos 4 caracteres e não pode ter espaços. Digite sua senha: ")
+
                             if len(senha) < 4 or " " in senha:
                                 raise ValueError("Sua senha precisa ter ao menos 4 caracteres e nenhum espaço.")
                             if "@" not in email or len(email) < 8:
                                 raise ValueError("O email precisa ter @ e não pode ter menos de 8 caracteres.")
+                            
                             novo_usuario = Usuario(username, senha, email)
                             user_dao.cadastrar_usuario(novo_usuario)
                         except ValueError as erro:
                             print("Ocorreu um erro: ", erro)
 
-                    case 2:
+                    case 4:
                         usuarios = user_dao.listar_usuarios()
-                        if len(usuarios) == 0:
+                        if usuarios == None:
                             print("Nenhum usuário cadastrado.")
                         else:
                             for usuario in usuarios:
@@ -152,16 +188,57 @@ while opcao != 0:
                                 print("Saldo: ", usuario[7])
                                 print("Limite: ", usuario[8])
 
-                    case 3:
-                        print("")
-
-                    case 4:
-                        print("")
-                    
                     case 5:
-                        print("")
+                        username_procurado = validar_texto("Digite o Username da conta que você deseja buscar.")
+                        usuario = user_dao.buscar_nome_usuario(username_procurado)
+                        if usuario is None:
+                            print("Nenhum usuário foi encontrado.")
+                        else:
+                            print("\n========================")
+                            print("ID do usuário: ", usuario[0])
+                            print("Username: ", usuario[1])
+                            print("Email: ", usuario[3])
+                            print("Qntd. de pontos: ", usuario[4])
+                            print("Qntd. de passagens: ", usuario[5])
+                            print("Qntd. de vales: ", usuario[6])
+                            print("Saldo: ", usuario[7])
+                            print("Limite: ", usuario[8])        
 
                     case 6:
+                        usuario_editado = validar_texto("Digite o nome do usuário que você deseja editar: ")
+                        usuario = user_dao.editar_usuario(usuario_editado)
+                        if usuario is None:
+                            print("Nenhum usuário foi encontrado.")
+                        else:
+                            print("\n========================")
+                            print("ID do usuário: ", usuario[0])
+                            print("Username: ", usuario[1])
+                            print("Email: ", usuario[3])
+                            print("Qntd. de pontos: ", usuario[4])
+                            print("Qntd. de passagens: ", usuario[5])
+                            print("Qntd. de vales: ", usuario[6])
+                            print("Saldo: ", usuario[7])
+                            print("Limite: ", usuario[8])        
+
+                    case 7:
+                        usuario_excluido = validar_texto("Digite o nome do usuário que você deseja excluir: ")
+                        usuario = user_dao.buscar_nome_usuario(usuario_excluido)
+                        if usuario is None:
+                            print("Nenhum usuário foi encontrado.")
+                        else:
+                            print("\n========================")
+                            print("ID do usuário: ", usuario[0])
+                            print("Username: ", usuario[1])
+                            print("Email: ", usuario[3])
+                            print("Qntd. de pontos: ", usuario[4])
+                            print("Qntd. de passagens: ", usuario[5])
+                            print("Qntd. de vales: ", usuario[6])
+                            print("Saldo: ", usuario[7])
+                            print("Limite: ", usuario[8])  
+
+                            user_dao.excluir_usuario(usuario_excluido)                           
+
+                    case 8:
                         print("Voltando ao menu anterior...")
                         break
                     
