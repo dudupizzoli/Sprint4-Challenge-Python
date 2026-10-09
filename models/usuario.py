@@ -17,3 +17,5 @@ class Usuario:
     #Método para exibir o objeto Usuario
     def __str__(self):
         return f"\nID: {self._id_usuario} | Username: {self._nome_usuario} | Email: {self._email_user} | \nPontos: {self._pontos} | Passagens: {self._passagens} | Saldo: {self._saldo} | Vales: {self._vales} | Limite: {self._limite}/10"
+
+    # def definir_missoes(self):

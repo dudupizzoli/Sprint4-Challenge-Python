@@ -75,12 +75,7 @@ while not login:
         case _:
             print("Opção inválida. Digite uma opção válida do menu.")
 
-
 opcao = -1
-opcao_geral = -1
-opcao_bu = -1
-opcao_posts = -1
-opca_user = -1
 
 while opcao != 0:
     print("\n===== Menu SoulUp Society =====")
@@ -98,8 +93,48 @@ while opcao != 0:
         continue
     match opcao:
 
-        case 1:
-            print("EM PROCESSO DE DESENVOLVIMENTO")
+        case 1: #Submenu do sistema - trata sobre opções gerais
+            while True:
+                print("\n======= Menu SoulUp Society - Geral =======")
+                print("1 - Conferir missões.") 
+                print("2 - Ver quantidade de pontos.") 
+                print("3 - Simular conversão de pontos em dinheiro.")
+                print("4 - Conferir limite de pontos transformados em passagens.")
+                print("5 - Voltar.")
+                try:
+                    opcao_geral = int(input("Digite o número da opção que você deseja: "))
+                except ValueError:
+                    print("Opção inválida. Digite apenas números.")
+                    continue
+
+                match opcao_geral:
+                    case 1:
+                        if len(usuario_atual._missoes) == 0:
+                            print("Nenhuma missão disponível.")
+                        else: 
+                            for missao in usuario_atual._missoes:
+                                print(missao)
+                
+                    case 2:
+                        print(f"Você possui um total de {usuario_atual._pontos} pontos.")
+                        
+                    case 3:
+                        try:
+                            pontos_simulacao = int(input("Insira a quantidade de pontos para fazer a simulação de uma conversão: "))
+                            simu_pont = conversao(pontos_simulacao)
+                            print(f"{pontos_simulacao} pontos são iguais a R$ {simu_pont:.2f}.")
+                        except ValueError:
+                            print("Ocorreu um erro. Digite apenas números.")
+
+                    case 4:
+                        print(f"Seu limite atual é de {usuario_atual._limite}/10 passagens.")
+
+                    case 5:
+                        print("Voltando ao menu anterior...")
+                        break
+
+                    case _:
+                        print("Opção inválida. Digite uma opção válida do menu.")
 
         case 2:
             print("EM PROCESSO DE DESENVOLVIMENTO")
@@ -126,14 +161,7 @@ while opcao != 0:
                 match opcao_user:
                     case 1:
                         print("\n=== Conta Logada Atualmente ===")
-                        print("ID do usuário: ", usuario_atual._id_usuario)
-                        print("Username: ", usuario_atual._username)
-                        print("Email: ", usuario_atual._email_user)
-                        print("Qntd. de pontos: ", usuario_atual._pontos)
-                        print("Qntd. de passagens: ", usuario_atual._passagens)
-                        print("Qntd. de vales: ", usuario_atual._vales)
-                        print("Saldo: ", usuario_atual._saldo)
-                        print("Limite: ", usuario_atual._limite)
+                        print(usuario_atual)
 
                     case 2:
                             try:
@@ -244,6 +272,7 @@ while opcao != 0:
                     
                     case _:
                         print("Opção inválida. Digite uma opção válida do menu.")
+
 
         case 5:
             print("EM PROCESSO DE DESENVOLVIMENTO")
