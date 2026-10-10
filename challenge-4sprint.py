@@ -11,6 +11,25 @@ def validar_texto(mensagem):
             return texto
         else:
             print("O campo não pode ficar em branco.")
+
+
+def ler_inteiro(mensagem):
+    while True:
+        try:
+            valor = int(input(mensagem))
+            if valor <= 0:
+                raise ValueError("O número não pode ser menor ou igual a 0.")
+        except ValueError as erro:
+            print("Ocorreu um erro: ", erro, ". Digite apenas números válidos.")
+
+def conversao(pontos):  #Função responsável por converter pontos em dinheiro, tanto para a simulação quanto para o bilhete único em si
+    #Recebe como parâmetro a quantidade de pontos inserida pelo usuário, verifica sua validade, e então retorna o valor em dinheiro
+    if pontos > 0:
+        valor_convertido = pontos * 0.0096
+        return valor_convertido
+    else:
+        print("Não é possível converter 0 ou números negativos")
+
             
 usuario_atual = None
 login = False
@@ -39,7 +58,9 @@ while not login:
                 if "@" not in email or len(email) < 8:
                     raise ValueError("O email precisa ter @ e não pode ter menos de 8 caracteres.")
                 novo_usuario = Usuario(username, senha, email)
+                Usuario.definir_missoes(novo_usuario)
                 user_dao.cadastrar_usuario(novo_usuario)
+                user_dao.adicionar_missoes(novo_usuario._id_usuario, novo_usuario._missoes)
 
                 usuario_atual = novo_usuario
                 print("Agora você está logado com: ", usuario_atual._username)     
@@ -109,10 +130,11 @@ while opcao != 0:
 
                 match opcao_geral:
                     case 1:
-                        if len(usuario_atual._missoes) == 0:
-                            print("Nenhuma missão disponível.")
-                        else: 
-                            for missao in usuario_atual._missoes:
+                        missoes_usuario_atual = user_dao.listar_missoes(usuario_atual._id_usuario)
+                        if missoes_usuario_atual == []:
+                            print("Você não possui nenhuma missão")
+                        else:
+                            for missao in missoes_usuario_atual:
                                 print(missao)
                 
                     case 2:
@@ -120,15 +142,15 @@ while opcao != 0:
                         
                     case 3:
                         try:
-                            pontos_simulacao = int(input("Insira a quantidade de pontos para fazer a simulação de uma conversão: "))
-                            simu_pont = conversao(pontos_simulacao)
-                            print(f"{pontos_simulacao} pontos são iguais a R$ {simu_pont:.2f}.")
+                            simular_pontos = ler_inteiro("Insira a quantidade de pontos para fazer a simulação de uma conversão: ")
+                            pontos_simulados = conversao(simular_pontos)
+                            print(f"{simular_pontos} pontos são iguais a R$ {pontos_simulados:.2f}.")
                         except ValueError:
                             print("Ocorreu um erro. Digite apenas números.")
 
                     case 4:
                         print(f"Seu limite atual é de {usuario_atual._limite}/10 passagens.")
-
+ 
                     case 5:
                         print("Voltando ao menu anterior...")
                         break
@@ -137,7 +159,25 @@ while opcao != 0:
                         print("Opção inválida. Digite uma opção válida do menu.")
 
         case 2:
-            print("EM PROCESSO DE DESENVOLVIMENTO")
+            while True: #Submenu do sistema - trata sobre as funções voltadas ao bilhete único
+                print("\n======= Menu SoulUp Society - Bilhete Único =======")
+                print("1 - Converter pontos em dinheiro para o bilhete único.") 
+                print("2 - Transferir o dinheiro para o bilhete único.") 
+                print("3 - Conferir a carga do bilhete único.") 
+                print("4 - Converter pontos em passagens do bilhete único (1 passagem = 580 pontos).") 
+                print("5 - Transferir as passagens para o bilhete único.") 
+                print("6 - Conferir a quantidade de passagens do bilhete único.") 
+                print("7 - Converter pontos em vales de desconto para a passagem (cada vale garante '20%' de desconto. Esta função apenas ficará disponível após atingir o limite de compra de passagens).")
+                print("8 - Transferir os vales de desconto para o bilhete único.") 
+                print("9 - Conferir a quantidade de vales de desconto.")
+                print("10 - Voltar.")
+                try:
+                    opcao_bu = int(input("Digite o número da opção que você deseja: "))
+                except ValueError:
+                    print("Opção inválida. Digite apenas números.")
+                    continue
+                #FAZER OS CASES
+
 
         case 3:
             print("EM PROCESSO DE DESENVOLVIMENTO")

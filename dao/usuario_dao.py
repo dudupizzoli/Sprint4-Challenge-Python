@@ -184,10 +184,7 @@ class UsuarioDAO:
             """
 
         try:
-            cursor.execute(sql, {
-                "email": email,
-                "senha": senha
-            })
+            cursor.execute(sql, {"email": email, "senha": senha})
             usuario_validado = cursor.fetchone()
 
             usuario = Usuario(usuario_validado[1], usuario_validado[2], usuario_validado[3], usuario_validado[4], usuario_validado[5], 
@@ -202,3 +199,60 @@ class UsuarioDAO:
             cursor.close()
             conn.close()     
 
+    def adicionar_missoes(self, id_usuario, missoes):
+        conn = self.conexao.conectar()
+        if conn is None:
+            print("Erro ao conectar ao Oracle.")
+
+        cursor = conn.cursor()
+
+        sql = """
+            insert into missoes_usuario (id_usuario, missao)
+            values (:id_usuario, :missao)
+        """
+
+        try:
+            for missao in missoes:
+                cursor.execute(sql, id_usuario=id_usuario, missao=missao)
+
+            conn.commit()
+            return "Missões adicionadas com sucesso."
+
+        except oracledb.Error as erro:
+            print("Houve um erro: ", erro)
+        
+        finally:
+            cursor.close()
+            conn.close() 
+
+
+    def listar_missoes(self, id_usuario):
+        conn = self.conexao.conectar()
+        if conn is None:
+            print("Erro ao conectar ao Oracle.")
+
+        cursor = conn.cursor()
+
+        sql = """
+            select missao
+            from missoes_usuario
+            where id_usuario = :id_usuario
+            order by id_missao
+        """
+
+        try:
+            cursor.execute(sql, id_usuario=id_usuario)
+
+            missoes = [linha[0] for linha in cursor.fetchall()]
+
+            if len(missoes) == 0:
+                return []
+            else:
+                return missoes
+
+        except oracledb.Error as erro:
+            print("Houve um erro: ", erro)
+        
+        finally:
+            cursor.close()
+            conn.close() 
