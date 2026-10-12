@@ -27,3 +27,10 @@ class Usuario:
             for missao in missoes_possiveis:
                 if numero_missao == missoes_possiveis.index(missao):
                     self._missoes.append(missao)
+
+    def relatorio_bu(self):
+        print("\n===== Relatório Bilhete Único =====")
+        print("Quantidade de pontos: ", self._pontos)
+        print("Saldo: ", self._saldo)
+        print("Quantidade de passagens: ", self._passagens)
+        print("Quantidade de vales: ", self._vales)

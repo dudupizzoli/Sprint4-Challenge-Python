@@ -120,7 +120,7 @@ while opcao != 0:
             while True:
                 print("\n======= Menu SoulUp Society - Geral =======")
                 print("1 - Conferir missões.") 
-                print("2 - Ver quantidade de pontos.") 
+                print("2 - Ver relatório do bilhete único.") 
                 print("3 - Simular conversão de pontos em dinheiro.")
                 print("4 - Conferir limite de pontos transformados em passagens.")
                 print("5 - Voltar.")
@@ -140,7 +140,7 @@ while opcao != 0:
                                 print(missao)
                 
                     case 2:
-                        print(f"Você possui um total de {usuario_atual._pontos} pontos.")
+                        usuario_atual.relatorio_bu()
                         
                     case 3:
                         try:
@@ -162,17 +162,15 @@ while opcao != 0:
 
         case 2:
             while True: #Submenu do sistema - trata sobre as funções voltadas ao bilhete único
-                print("\n======= Menu SoulUp Society - Bilhete Único =======")
-                print("1 - Converter pontos em dinheiro para o bilhete único.") 
-                print("2 - Transferir o dinheiro para o bilhete único.") 
-                print("3 - Conferir a carga do bilhete único.") 
+                print("\n======= Menu SoulUp Society - Bilhete Único =======") 
+                print("1 - Ver quantidade de pontos.")
+                print("2 - Converter pontos em dinheiro para o bilhete único.") 
+                print("3 - Conferir o saldo do bilhete único.") 
                 print("4 - Converter pontos em passagens do bilhete único (1 passagem = 580 pontos).") 
-                print("5 - Transferir as passagens para o bilhete único.") 
-                print("6 - Conferir a quantidade de passagens do bilhete único.") 
-                print("7 - Converter pontos em vales de desconto para a passagem (cada vale garante '20%' de desconto. Esta função apenas ficará disponível após atingir o limite de compra de passagens).")
-                print("8 - Transferir os vales de desconto para o bilhete único.") 
-                print("9 - Conferir a quantidade de vales de desconto.")
-                print("10 - Voltar.")
+                print("5 - Conferir a quantidade de passagens no bilhete único.") 
+                print("6 - Converter pontos em vales de desconto para a passagem (cada vale garante '20%' de desconto. Esta função apenas ficará disponível após atingir o limite de compra de passagens).")
+                print("7 - Conferir a quantidade de vales de desconto.")
+                print("8 - Voltar.")
                 try:
                     opcao_bu = int(input("Digite o número da opção que você deseja: "))
                 except ValueError:
@@ -181,6 +179,9 @@ while opcao != 0:
                 match opcao_bu:
 
                     case 1:
+                        print(f"Você possui um total de {usuario_atual._pontos} pontos atualmente.")
+
+                    case 2:
                         pontos_para_conversao = ler_inteiro("Insira a quantidade de pontos que você deseja converter em dinheiro para o bilhete único: ")
                         if pontos_para_conversao > usuario_atual._pontos:
                             print("Não foi possível realizar a conversão pois o valor de pontos inserido foi maior do que a quantidade que a conta possui.")
@@ -192,8 +193,16 @@ while opcao != 0:
                             user_dao.atualizar_saldo(usuario_atual._id_usuario, usuario_atual._saldo)
                             print(f"Você converteu {pontos_para_conversao} em R$ {saldo_ganho:.2f} com sucesso!")
 
+                    case 3:
+                        print(f"Atualmente, o saldo de seu bilhete é de R$ {usuario_atual._saldo:.2f}.")
 
-                    case 10:
+                    case 5:
+                        print(f"Atualmente, você possui {usuario_atual._passagens} passagem(ns) no bilhete único.")
+
+                    case 7:
+                        print(f"Atualmente você possui {usuario_atual._vales} vale(s) no bilhete único.")
+
+                    case 8:
                         print("Voltando ao menu anterior...")
                         break
 
