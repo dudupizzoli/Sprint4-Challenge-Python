@@ -19,10 +19,12 @@ def ler_inteiro(mensagem):
             valor = int(input(mensagem))
             if valor <= 0:
                 raise ValueError("O número não pode ser menor ou igual a 0.")
+            else:
+                return valor
         except ValueError as erro:
             print("Ocorreu um erro: ", erro, ". Digite apenas números válidos.")
 
-def conversao(pontos):  #Função responsável por converter pontos em dinheiro, tanto para a simulação quanto para o bilhete único em si
+def conversao_dinheiro(pontos):  #Função responsável por converter pontos em dinheiro, tanto para a simulação quanto para o bilhete único em si
     #Recebe como parâmetro a quantidade de pontos inserida pelo usuário, verifica sua validade, e então retorna o valor em dinheiro
     if pontos > 0:
         valor_convertido = pontos * 0.0096
@@ -143,7 +145,7 @@ while opcao != 0:
                     case 3:
                         try:
                             simular_pontos = ler_inteiro("Insira a quantidade de pontos para fazer a simulação de uma conversão: ")
-                            pontos_simulados = conversao(simular_pontos)
+                            pontos_simulados = conversao_dinheiro(simular_pontos)
                             print(f"{simular_pontos} pontos são iguais a R$ {pontos_simulados:.2f}.")
                         except ValueError:
                             print("Ocorreu um erro. Digite apenas números.")
@@ -176,7 +178,27 @@ while opcao != 0:
                 except ValueError:
                     print("Opção inválida. Digite apenas números.")
                     continue
-                #FAZER OS CASES
+                match opcao_bu:
+
+                    case 1:
+                        pontos_para_conversao = ler_inteiro("Insira a quantidade de pontos que você deseja converter em dinheiro para o bilhete único: ")
+                        if pontos_para_conversao > usuario_atual._pontos:
+                            print("Não foi possível realizar a conversão pois o valor de pontos inserido foi maior do que a quantidade que a conta possui.")
+                        else:
+                            usuario_atual._pontos -= pontos_para_conversao
+                            saldo_ganho = conversao_dinheiro(pontos_para_conversao)
+                            usuario_atual._saldo += saldo_ganho
+                            user_dao.atualizar_qtd_pontos(usuario_atual._id_usuario, usuario_atual._pontos)
+                            user_dao.atualizar_saldo(usuario_atual._id_usuario, usuario_atual._saldo)
+                            print(f"Você converteu {pontos_para_conversao} em R$ {saldo_ganho:.2f} com sucesso!")
+
+
+                    case 10:
+                        print("Voltando ao menu anterior...")
+                        break
+
+                    case _:
+                        print("Opção inválida. Digite uma opção válida do menu.")
 
 
         case 3:

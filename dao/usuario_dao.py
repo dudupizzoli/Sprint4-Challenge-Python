@@ -89,7 +89,6 @@ class UsuarioDAO:
             cursor.close()
             conn.close()
 
-    #troquei o parâmetro do método acima. avaliar se vou trocar dos de baixo tbm
     def editar_usuario(self, nome_usuario):    
         usuario = self.buscar_nome_usuario(nome_usuario)
 
@@ -120,7 +119,7 @@ class UsuarioDAO:
                 cursor = conn.cursor()
                 sql = """update usuarios_soulup 
                         set username = :username, 
-                            email = :email 
+                        email = :email 
                         where username = :nome_usuario 
                         """
 
@@ -249,6 +248,56 @@ class UsuarioDAO:
                 return []
             else:
                 return missoes
+
+        except oracledb.Error as erro:
+            print("Houve um erro: ", erro)
+        
+        finally:
+            cursor.close()
+            conn.close() 
+
+    def atualizar_qtd_pontos(self, id_usuario, nova_qtd_pontos):
+        conn = self.conexao.conectar()
+        if conn is None:
+            print("Erro ao conectar ao Oracle.")
+        
+        cursor = conn.cursor()
+        
+        sql = """
+            update usuarios_soulup 
+            set pontos = :nova_qtd_pontos, 
+            where id_usuario = :id_usuario 
+            """
+
+        try:
+            cursor.execute(sql, nova_qtd_pontos=nova_qtd_pontos, id_usuario=id_usuario)
+
+            return "Houve um erro ao atualizar a quantidade de pontos."
+
+        except oracledb.Error as erro:
+            print("Houve um erro: ", erro)
+        
+        finally:
+            cursor.close()
+            conn.close() 
+
+    def atualizar_saldo(self, id_usuario, novo_saldo):
+        conn = self.conexao.conectar()
+        if conn is None:
+            print("Erro ao conectar ao Oracle.")
+        
+        cursor = conn.cursor()
+        
+        sql = """
+            update usuarios_soulup 
+            set saldo = :novo_saldo, 
+            where id_usuario = :id_usuario 
+            """
+
+        try:
+            cursor.execute(sql, novo_saldo=novo_saldo, id_usuario=id_usuario)
+
+            return "Houve um erro ao atualizar o saldo."
 
         except oracledb.Error as erro:
             print("Houve um erro: ", erro)
