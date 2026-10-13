@@ -16,7 +16,7 @@ class UsuarioDAO:
     def cadastrar_usuario(self, usuario):
         conn = self.conexao.conectar()
         if conn is None:
-            print("Erro ao conectar ao Oracle.")
+            return "Erro ao conectar ao Oracle."
 
         username = usuario.username
         senha = usuario.senha
@@ -45,7 +45,7 @@ class UsuarioDAO:
     def listar_usuarios(self):
         conn = self.conexao.conectar()
         if conn is None:
-            print("Erro ao conectar ao Oracle.") 
+            return "Erro ao conectar ao Oracle." 
 
         cursor = conn.cursor()
         sql = """select id_usuario, username, senha, email, pontos, passagens, vales, saldo, limite from usuarios_soulup order by id_usuario"""
@@ -69,7 +69,7 @@ class UsuarioDAO:
     def buscar_nome_usuario(self, username):
         conn = self.conexao.conectar()
         if conn is None:
-            print("Erro ao conectar ao Oracle.") 
+            return "Erro ao conectar ao Oracle." 
         
         cursor = conn.cursor()
         sql = """select id_usuario, username, senha, email, pontos, passagens, vales, saldo, limite from usuarios_soulup where username = :username"""
@@ -102,7 +102,7 @@ class UsuarioDAO:
             if senha == usuario[2]:
                 conn = self.conexao.conectar()
                 if conn is None:
-                    print("Erro ao conectar ao Oracle.")
+                    return "Erro ao conectar ao Oracle."
 
                 username = input(f"Seu nome de usuário atual é: {usuario[1]}, caso não queira mudá-lo, aperte enter. Digite seu novo nome de usuário: ").strip()
                 email = input(f"Seu email atual é: {usuario[3]}, caso não queira mudá-lo, aperte enter. Digite seu novo email: ").strip()
@@ -130,7 +130,7 @@ class UsuarioDAO:
                     return usuario
                 except oracledb.Error as erro:
                     conn.rollback()
-                    return f"Erro ao alterar: {erro}"
+                    print("Houve um erro: ", erro)
                 finally:
                     cursor.close()
                     conn.close()
@@ -150,7 +150,7 @@ class UsuarioDAO:
             if senha == usuario[2]:
                 conn = self.conexao.conectar()
                 if conn is None:
-                    print("Erro ao conectar ao Oracle.")
+                    return "Erro ao conectar ao Oracle."
 
                 cursor = conn.cursor()
                 sql = """delete from usuarios_soulup where username = :username"""
@@ -161,7 +161,7 @@ class UsuarioDAO:
                     print("A conta foi excluída com sucesso!")
                 except oracledb.Error as erro:
                     conn.rollback()
-                    return f"Erro ao alterar: {erro}"
+                    print("Houve um erro: ", erro)
                 finally:
                     cursor.close()
                     conn.close()
@@ -174,7 +174,7 @@ class UsuarioDAO:
     def validar_login(self, email, senha):
         conn = self.conexao.conectar()
         if conn is None:
-            print("Erro ao conectar ao Oracle.")
+            return "Erro ao conectar ao Oracle."
         
         cursor = conn.cursor()
         sql = """
@@ -201,7 +201,7 @@ class UsuarioDAO:
     def adicionar_missoes(self, id_usuario, missoes):
         conn = self.conexao.conectar()
         if conn is None:
-            print("Erro ao conectar ao Oracle.")
+            return "Erro ao conectar ao Oracle."
 
         cursor = conn.cursor()
 
@@ -218,6 +218,7 @@ class UsuarioDAO:
             return "Missões adicionadas com sucesso."
 
         except oracledb.Error as erro:
+            conn.rollback()
             print("Houve um erro: ", erro)
         
         finally:
@@ -228,7 +229,7 @@ class UsuarioDAO:
     def listar_missoes(self, id_usuario):
         conn = self.conexao.conectar()
         if conn is None:
-            print("Erro ao conectar ao Oracle.")
+            return "Erro ao conectar ao Oracle."
 
         cursor = conn.cursor()
 
@@ -259,22 +260,22 @@ class UsuarioDAO:
     def atualizar_qtd_pontos(self, id_usuario, nova_qtd_pontos):
         conn = self.conexao.conectar()
         if conn is None:
-            print("Erro ao conectar ao Oracle.")
+            return "Erro ao conectar ao Oracle."
         
         cursor = conn.cursor()
         
         sql = """
             update usuarios_soulup 
-            set pontos = :nova_qtd_pontos, 
+            set pontos = :nova_qtd_pontos 
             where id_usuario = :id_usuario 
             """
 
         try:
             cursor.execute(sql, nova_qtd_pontos=nova_qtd_pontos, id_usuario=id_usuario)
-
-            return "Houve um erro ao atualizar a quantidade de pontos."
+            conn.commit()
 
         except oracledb.Error as erro:
+            conn.rollback()
             print("Houve um erro: ", erro)
         
         finally:
@@ -284,24 +285,76 @@ class UsuarioDAO:
     def atualizar_saldo(self, id_usuario, novo_saldo):
         conn = self.conexao.conectar()
         if conn is None:
-            print("Erro ao conectar ao Oracle.")
+            return "Erro ao conectar ao Oracle."
         
         cursor = conn.cursor()
         
         sql = """
             update usuarios_soulup 
-            set saldo = :novo_saldo, 
+            set saldo = :novo_saldo 
             where id_usuario = :id_usuario 
             """
 
         try:
             cursor.execute(sql, novo_saldo=novo_saldo, id_usuario=id_usuario)
-
-            return "Houve um erro ao atualizar o saldo."
+            conn.commit()
 
         except oracledb.Error as erro:
+            conn.rollback()
             print("Houve um erro: ", erro)
         
         finally:
             cursor.close()
             conn.close() 
+    
+    def atualizar_passagens(self, id_usuario, novas_passagens):
+        conn = self.conexao.conectar()
+        if conn is None:
+            return "Erro ao conectar ao Oracle."
+        
+        cursor = conn.cursor()
+        
+        sql = """
+            update usuarios_soulup 
+            set passagens = :novas_passagens 
+            where id_usuario = :id_usuario 
+            """
+
+        try:
+            cursor.execute(sql, novas_passagens=novas_passagens, id_usuario=id_usuario)
+            conn.commit()
+
+        except oracledb.Error as erro:
+            conn.rollback()
+            print("Houve um erro: ", erro)
+        
+        finally:
+            cursor.close()
+            conn.close() 
+    
+    def atualizar_vales(self, id_usuario, novos_vales):
+        conn = self.conexao.conectar()
+        if conn is None:
+            return "Erro ao conectar ao Oracle."
+        
+        cursor = conn.cursor()
+        
+        sql = """
+            update usuarios_soulup 
+            set vales = :novos_vales 
+            where id_usuario = :id_usuario 
+            """
+
+        try:
+            cursor.execute(sql, novos_vales=novos_vales, id_usuario=id_usuario)
+            conn.commit()
+
+        except oracledb.Error as erro:
+            conn.rollback()
+            print("Houve um erro: ", erro)
+        
+        finally:
+            cursor.close()
+            conn.close() 
+
+            # TROCAR OS PRINTS DE CONN POR RETURN PARA QUE O MÉTODO PARE NA HORA QUE DER O ERRO

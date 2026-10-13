@@ -32,12 +32,30 @@ def conversao_dinheiro(pontos):  #Função responsável por converter pontos em 
     else:
         print("Não é possível converter 0 ou números negativos")
 
+def conversao_passagem(passagens):  #Função responsável por converter pontos em passagens para o bilhete único
+    #Recebe como parâmetro a quantidade de passagens que o usuário deseja adquirir com seus pontos
+    if passagens > 0:
+        pontos_necessarios = passagens * 580
+        return pontos_necessarios
+    else:
+        print("Não é possível converter 0 ou números negativos")
+
+def conversao_vales(vales):  #Função responsável por converter pontos em desconto para passagens no bilhete único
+    #Recebe como parâmetro a quantidade de vales de desconto que o usuário deseja adquirir com seus pontos
+    if vales > 0:
+        pontos_necessarios = vales * 113
+        return pontos_necessarios
+    else:
+        print("Não é possível converter 0 ou números negativos")
+
+
             
 usuario_atual = None
 login = False
 opcao_login = -1
 
 while not login:
+    print("\n=======================================")
     print("Bem-vindo à SoulUp Society!!")
     print("Ainda não possui uma conta? Cadastre-se!")
     print("1 - Realizar cadastro.")
@@ -196,8 +214,35 @@ while opcao != 0:
                     case 3:
                         print(f"Atualmente, o saldo de seu bilhete é de R$ {usuario_atual._saldo:.2f}.")
 
+                    case 4:
+                        passagens_desejadas = ler_inteiro("Insira a quantidade de passagens que você deseja adquirir para o bilhete único: ")
+                        custo_em_pontos = conversao_passagem(passagens_desejadas)
+                        if passagens_desejadas > usuario_atual._limite or usuario_atual._saldo < custo_em_pontos:
+                            print("Não foi possível realizar a conversão. Confira seu limite ou sua quantidade de pontos.")
+                        else: 
+                            usuario_atual._pontos -= custo_em_pontos
+                            usuario_atual._passagens += passagens_desejadas
+                            user_dao.atualizar_qtd_pontos(usuario_atual._id_usuario, usuario_atual._pontos)
+                            user_dao.atualizar_passagens(usuario_atual._id_usuario, usuario_atual._passagens)
+                            print(f"Você converteu {custo_em_pontos} em {passagens_desejadas:.2f} passagens com sucesso!")
+
                     case 5:
                         print(f"Atualmente, você possui {usuario_atual._passagens} passagem(ns) no bilhete único.")
+
+                    case 6:
+                        if usuario_atual._limite != 0:
+                            print("Não foi possível prosseguir pois seu limite de passagens ainda não chegou a 0.")
+                        else:
+                            vales_desejados = ler_inteiro("Insira a quantidade de vales que você deseja adquirir para o bilhete único: ") 
+                            custo_em_pontos = conversao_vales(vales_desejados)
+                            if usuario_atual._saldo < custo_em_pontos:
+                                print("Não foi possível realizar a conversão. Confira sua quantidade de pontos.") 
+                            else:
+                                usuario_atual._pontos -= custo_em_pontos
+                                usuario_atual._vales += vales_desejados
+                                user_dao.atualizar_qtd_pontos(usuario_atual._id_usuario, usuario_atual._pontos)
+                                user_dao.atualizar_vales(usuario_atual._id_usuario, usuario_atual._vales)
+                                print(f"Você converteu {custo_em_pontos} em {vales_desejados:.2f} vales com sucesso!")
 
                     case 7:
                         print(f"Atualmente você possui {usuario_atual._vales} vale(s) no bilhete único.")
