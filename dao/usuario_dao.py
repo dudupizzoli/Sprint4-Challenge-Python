@@ -357,4 +357,3 @@ class UsuarioDAO:
             cursor.close()
             conn.close() 
 
-            # TROCAR OS PRINTS DE CONN POR RETURN PARA QUE O MÉTODO PARE NA HORA QUE DER O ERRO

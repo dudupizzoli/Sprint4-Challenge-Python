@@ -1,6 +1,6 @@
-from conexaoOracle.conexaodb import Conexaodb
 from models.usuario import Usuario
 from dao.usuario_dao import UsuarioDAO
+import json
 
 user_dao = UsuarioDAO()
 
@@ -48,8 +48,33 @@ def conversao_vales(vales):  #Função responsável por converter pontos em desc
     else:
         print("Não é possível converter 0 ou números negativos")
 
+def exportar_json():
+    try:
+        usuarios = user_dao.listar_usuarios()
+        if usuarios == None:
+            raise OSError("Nenhum usuário foi encontrado para a exportação.")
+        else:
+            lista_usuarios = []
+            for usuario in usuarios:
+                dados_usuario = {
+                    "id_usuario": usuario[0],
+                    "username": usuario[1],
+                    "email": usuario[3],
+                    "quantidade_pontos": usuario[4],
+                    "quantidade_passagens": usuario[5],
+                    "quantidade_vales": usuario[6],
+                    "saldo": usuario[7],
+                    "limite": usuario[8]
+                    }
+                lista_usuarios.append(dados_usuario)
+            with open("usuarios_soulup_society.json","w",encoding="utf-8") as arquivo:
+                json.dump(lista_usuarios, arquivo, ensure_ascii=False, indent=4)
+            print("\nO arquivo 'usuarios_soulup_society.json' foi gerado com sucesso!")
+            print(f"Foram exportados {len(lista_usuarios)} usuários.")
+    except OSError as erro:
+                    print("Ocorreu um erro durante a criação do arquivo: ", erro)
 
-            
+
 usuario_atual = None
 login = False
 opcao_login = -1
@@ -391,7 +416,33 @@ while opcao != 0:
 
 
         case 5:
-            print("EM PROCESSO DE DESENVOLVIMENTO")
+            print("\nEsta opção irá gerar um relatório .json sobre os usuários já cadastrados na SoulUp Society.")
+            print("Gerando relatório...")
+            try:
+                usuarios = user_dao.listar_usuarios()
+                if usuarios == None:
+                    raise OSError("Nenhum usuário foi encontrado para a exportação.")
+                else:
+                    lista_usuarios = []
+                    for usuario in usuarios:
+                        dados_usuario = {
+                            "id_usuario": usuario[0],
+                            "username": usuario[1],
+                            "email": usuario[3],
+                            "quantidade_pontos": usuario[4],
+                            "quantidade_passagens": usuario[5],
+                            "quantidade_vales": usuario[6],
+                            "saldo": usuario[7],
+                            "limite": usuario[8]
+                            }
+                        lista_usuarios.append(dados_usuario)
+                    with open("usuarios_soulup_society.json","w",encoding="utf-8") as arquivo:
+                        json.dump(lista_usuarios, arquivo, ensure_ascii=False, indent=4)
+                    print("\nO arquivo 'usuarios_soulup_society.json' foi gerado com sucesso!")
+                    print(f"Foram exportados {len(lista_usuarios)} usuários.")
+            except OSError as erro:
+                print("Ocorreu um erro durante a criação do arquivo: ", erro)
+            
 
         case 6:
             print("EM PROCESSO DE DESENVOLVIMENTO")
