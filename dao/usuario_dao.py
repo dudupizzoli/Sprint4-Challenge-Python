@@ -246,7 +246,7 @@ class UsuarioDAO:
             missoes = [linha[0] for linha in cursor.fetchall()]
 
             if len(missoes) == 0:
-                return []
+                return None
             else:
                 return missoes
 

@@ -1,6 +1,8 @@
 from models.usuario import Usuario
 from dao.usuario_dao import UsuarioDAO
 import json
+from pathlib import Path
+import webbrowser
 
 user_dao = UsuarioDAO()
 
@@ -71,9 +73,98 @@ def exportar_json():
                 json.dump(lista_usuarios, arquivo, ensure_ascii=False, indent=4)
             print("\nO arquivo 'usuarios_soulup_society.json' foi gerado com sucesso!")
             print(f"Foram exportados {len(lista_usuarios)} usuários.")
+
     except OSError as erro:
                     print("Ocorreu um erro durante a criação do arquivo: ", erro)
 
+def exportar_html():
+    try:
+        usuarios = user_dao.listar_usuarios()
+        if usuarios == None:
+            raise OSError("Nenhum usuário foi encontrado para a exportação.")
+        else:
+            num_usuarios = 0
+            usuarios_encontrados = ""
+            lista_usuarios = []
+            for usuario in usuarios:
+                    id_usuario = usuario[0],
+                    username = usuario[1],
+                    email = usuario[3],
+                    quantidade_pontos = usuario[4],
+                    quantidade_passagens = usuario[5],
+                    quantidade_vales = usuario[6],
+                    saldo = usuario[7],
+                    limite = usuario[8]
+                    missoes = user_dao.listar_missoes(id_usuario)
+                    if missoes == None:
+                        raise OSError(f"Nenhuma missão foi encontrada para o usuário: {username}")
+                    else: 
+                        missao_1 = missoes[0]
+                        missao_2 = missoes[1]
+                        missao_3 = missoes[2]
+                        
+                        num_usuarios += 1
+                        usuarios_encontrados += f"""
+                        <div class="card__usuario">
+                            <h2>Nome de usuário: {username}</h2>
+                            <p>Id do usuário: {id_usuario}</p>
+                            <p>Email: {email}</p>
+                            <div class="carteira">
+                                <h3>Carteira</h3>
+                                <p>Quantidade de pontos: {quantidade_pontos}</p>
+                                <p>Quantidade de passagens: {quantidade_passagens}</p>
+                                <p>Quantidade de vales: {quantidade_vales}</p>
+                                <p>Saldo: R${saldo}</p>
+                                <p>Limite de passagens: {limite}/10</p>
+                            </div>
+                            <div>
+                                <h3>Missões</h3>
+                                <p>{missao_1}</p>
+                                <p>{missao_2}</p>
+                                <p>{missao_3}</p>
+                            </div>
+                        </div>                      
+                        """
+                        if num_usuarios == 0:
+                            usuarios_encontrados = """
+                            <h2>Nenhum usuário encontrado para essa cidade.</h2>
+                            """
+
+                        html = f"""
+                        <!DOCTYPE html>
+                        <html lang="pt-br">
+                        <head>
+                            <meta charset="UTF-8">
+                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                            <title>Usuários | SoulUp Society</title>
+                        </head>
+                        <body>
+                            <main>
+                                <h1>SoulUp Society - Usuários</h1>
+                                <p>Abaixo você poderá conferir cards com os dados de todos os usuários cadastrados até o momento na SoulUp Society!</p>
+                                <p>Atualmente existem {num_usuarios} usuários cadastrados!</p>
+
+                                {usuarios_encontrados}
+
+                            </main>
+                            <footer class="rodape">
+                                <p>Todos os direitos reservados - SoulUp Society - &copy; - 2026</p>
+                            </footer>
+                        </body>
+                        </html>
+                        """
+
+                        with open("usuarios_soulup_society.html", "w",encoding="utf-8") as arquivo:
+                            arquivo.write(html)
+
+                        arquivo_html = Path("usuarios_soulup_society.html").resolve()
+                        endereco = arquivo_html.as_uri()
+                        webbrowser.open(endereco)
+                        print("\nO arquivo 'usuarios_soulup_society.html' foi gerado com sucesso!")
+                        print("Abrindo a página no navegador...")
+
+    except OSError as erro:
+                    print("Ocorreu um erro durante a criação do arquivo: ", erro)
 
 usuario_atual = None
 login = False
@@ -176,7 +267,7 @@ while opcao != 0:
                 match opcao_geral:
                     case 1:
                         missoes_usuario_atual = user_dao.listar_missoes(usuario_atual._id_usuario)
-                        if missoes_usuario_atual == []:
+                        if missoes_usuario_atual == None:
                             print("Você não possui nenhuma missão")
                         else:
                             for missao in missoes_usuario_atual:
@@ -418,34 +509,14 @@ while opcao != 0:
         case 5:
             print("\nEsta opção irá gerar um relatório .json sobre os usuários já cadastrados na SoulUp Society.")
             print("Gerando relatório...")
-            try:
-                usuarios = user_dao.listar_usuarios()
-                if usuarios == None:
-                    raise OSError("Nenhum usuário foi encontrado para a exportação.")
-                else:
-                    lista_usuarios = []
-                    for usuario in usuarios:
-                        dados_usuario = {
-                            "id_usuario": usuario[0],
-                            "username": usuario[1],
-                            "email": usuario[3],
-                            "quantidade_pontos": usuario[4],
-                            "quantidade_passagens": usuario[5],
-                            "quantidade_vales": usuario[6],
-                            "saldo": usuario[7],
-                            "limite": usuario[8]
-                            }
-                        lista_usuarios.append(dados_usuario)
-                    with open("usuarios_soulup_society.json","w",encoding="utf-8") as arquivo:
-                        json.dump(lista_usuarios, arquivo, ensure_ascii=False, indent=4)
-                    print("\nO arquivo 'usuarios_soulup_society.json' foi gerado com sucesso!")
-                    print(f"Foram exportados {len(lista_usuarios)} usuários.")
-            except OSError as erro:
-                print("Ocorreu um erro durante a criação do arquivo: ", erro)
+            exportar_json()
             
 
         case 6:
-            print("EM PROCESSO DE DESENVOLVIMENTO")
+            print("\nEsta opção irá gerar um relatório .html sobre os usuários já cadastrados na SoulUp Society.")
+            print("Gerando relatório...")
+            exportar_html()
+
 
         case 0:
             print("Encerrando sistema...")
