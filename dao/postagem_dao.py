@@ -44,7 +44,7 @@ class PostagemDAO:
         cursor = conn.cursor()
 
         sql = """
-            select id_post, texto
+            select id_post, id_usuario, texto
             from posts_soulup
             where id_usuario = :id_usuario
             order by id_post

@@ -1,10 +1,12 @@
 from models.usuario import Usuario
 from dao.usuario_dao import UsuarioDAO
+from dao.postagem_dao import PostagemDAO
 import json
 from pathlib import Path
 import webbrowser
 
 user_dao = UsuarioDAO()
+post_dao = PostagemDAO()
 
 def validar_texto(mensagem):
     while True:
@@ -481,7 +483,85 @@ while opcao != 0:
 
 
         case 3:
-            print("EM PROCESSO DE DESENVOLVIMENTO")
+            while True:  #Submenu do sistema - trata sobre as postagens do usuário | Aqui se encontra um CRUD
+                print("\n======= Menu SoulUp Society - Postagens =======") 
+                print("1 - Escrever nova postagem.") #Create   
+                print("2 - Ver minhas postagens.") #Read
+                print("3 - Procurar postagem pelo ID.") #Read    
+                print("4 - Editar uma postagem.") #Update  
+                print("5 - Excluir uma postagem.") #Delete
+                print("6 - Voltar.") 
+                try:
+                    opcao_post = int(input("Digite o número da opção que você deseja: "))
+                except ValueError:
+                    print("Opção inválida. Digite apenas números.")
+                    continue
+
+                match opcao_post:
+                    case 1: 
+                        try: 
+                            texto_postagem = validar_texto("O que deseja escrever? ")
+                            if len(texto_postagem) > 350:
+                                raise ValueError("A postagem não pode conter mais do que 350 caracteres.")
+
+                            post_dao.fazer_postagem(usuario_atual._id_usuario, texto_postagem)
+
+                        except ValueError as erro:
+                            print("Ocorreu um erro: ", erro)     
+
+                    case 2:
+                        postagens = post_dao.listar_postagens(usuario_atual._id_usuario)
+                        if postagens is None:
+                            print("Esta conta não possui nenhuma postagem.")  
+                        else:
+                            for post in postagens:
+                                print("\n========================")
+                                print("ID da postagem: ", post[0])
+                                print("ID do usuário: ", post[1])
+                                print("Post: ", post[2]) 
+
+                    case 3:
+                        postagem_procurada = ler_inteiro("Digite o ID da postagem que você deseja buscar.")
+                        postagem = post_dao.buscar_id_postagem(postagem_procurada)
+                        if postagem is None:
+                            print("Nenhuma postagem foi encontrada.")
+                        else:
+                            print("\n========================")
+                            print("ID da postagem: ", post[0])
+                            print("ID do usuário: ", post[1])
+                            print("Post: ", post[2])      
+
+                    case 4:
+                        postagem_editada = ler_inteiro("Digite o ID da postagem que você deseja editar: ")
+                        postagem = post_dao.editar_postagem(postagem_editada)
+                        if postagem is None:
+                            print("Nenhuma usuária foi encontrada.")
+                        else:
+                            print("\n========================")
+                            print("ID da postagem: ", post[0])
+                            print("ID do usuário: ", post[1])
+                            print("Post: ", post[2])     
+
+                    case 5:
+                        postagem_excluida = validar_texto("Digite o ID da postagem que você deseja excluir: ")
+                        postagem = post_dao.buscar_id_postagem(postagem_excluida)
+                        if usuario is None:
+                            print("Nenhuma postagem foi encontrada.")
+                        else:
+                            print("\n========================")
+                            print("ID da postagem: ", post[0])
+                            print("ID do usuário: ", post[1])
+                            print("Post: ", post[2])  
+
+                            user_dao.excluir_usuario(postagem_excluida)                               
+
+                    case 6:
+                        print("Voltando ao menu anterior...")
+                        break
+
+                    case _:
+                        print("Opção inválida. Digite uma opção válida do menu.")
+
 
         case 4:
             while True:    #Submenu do sistema - trata sobre as contas do usuário | Aqui se encontra um CRUD
