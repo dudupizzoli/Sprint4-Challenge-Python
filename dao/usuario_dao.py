@@ -2,7 +2,6 @@ from conexaoOracle.conexaodb import Conexaodb
 from models.usuario import Usuario
 import oracledb
 
-#O QUE FAZER AGORA: cuidar da exportação dos dados para JSON, fazer o menu e toda a solução funcionar de fato, fazer o html, testar
 class UsuarioDAO:
     def __init__(self):
         self.conexao = Conexaodb(
@@ -36,7 +35,7 @@ class UsuarioDAO:
 
         except oracledb.Error as erro:
             conn.rollback()
-            print("\nFalha ao cadastrar no banco:", erro)
+            print("\nHouve um erro: ", erro)
     
         finally:
             cursor.close()
@@ -169,7 +168,7 @@ class UsuarioDAO:
             else:
                 print("Senha incorreta. Não foi possível excluir o usuário.")
         else:
-            print("A exclusão foi cancelada com sucesso!")
+            print("Digite apenas S ou N.")
 
     def validar_login(self, email, senha):
         conn = self.conexao.conectar()

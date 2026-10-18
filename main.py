@@ -115,7 +115,7 @@ def exportar_html():
                                 <p>Quantidade de pontos: {quantidade_pontos}</p>
                                 <p>Quantidade de passagens: {quantidade_passagens}</p>
                                 <p>Quantidade de vales: {quantidade_vales}</p>
-                                <p>Saldo: R${saldo}</p>
+                                <p>Saldo: R${saldo:.2f}</p>
                                 <p>Limite de passagens: {limite}/10</p>
                             </div>
                             <div>
