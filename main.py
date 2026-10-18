@@ -4,6 +4,7 @@ from dao.postagem_dao import PostagemDAO
 import json
 from pathlib import Path
 import webbrowser
+from html import escape
 
 user_dao = UsuarioDAO()
 post_dao = PostagemDAO()
@@ -82,200 +83,193 @@ def exportar_json():
 #REVISAR ESSA FUNÇÃO DEPOIS
 def exportar_html():
     try:
-        usuarios = user_dao.listar_usuarios()
-        if usuarios is None:
-            raise OSError("Nenhum usuário foi encontrado para a exportação.")
-        else:
-            num_usuarios = 0
-            usuarios_encontrados = ""
-            lista_usuarios = []
-            for usuario in usuarios:
-                    id_usuario = usuario[0]
-                    username = usuario[1]
-                    email = usuario[3]
-                    quantidade_pontos = usuario[4]
-                    quantidade_passagens = usuario[5]
-                    quantidade_vales = usuario[6]
-                    saldo = usuario[7]
-                    limite = usuario[8]
-                    missoes = user_dao.listar_missoes(id_usuario)
-                    if missoes == None:
-                        raise OSError(f"Nenhuma missão foi encontrada para o usuário: {username}")
-                    else: 
-                        missao_1 = missoes[0]
-                        missao_2 = missoes[1]
-                        missao_3 = missoes[2]
-                        
-                        num_usuarios += 1
-                        usuarios_encontrados += f"""
-                        <div class="card__usuario">
-                            <h2>Nome de usuário: {username}</h2>
-                            <p>Id do usuário: {id_usuario}</p>
-                            <p>Email: {email}</p>
-                            <div class="carteira">
-                                <h3>Carteira</h3>
-                                <p>Quantidade de pontos: {quantidade_pontos}</p>
-                                <p>Quantidade de passagens: {quantidade_passagens}</p>
-                                <p>Quantidade de vales: {quantidade_vales}</p>
-                                <p>Saldo: R${saldo:.2f}</p>
-                                <p>Limite de passagens: {limite}/10</p>
-                            </div>
-                            <div>
-                                <h3>Missões</h3>
-                                <p>{missao_1}</p>
-                                <p>{missao_2}</p>
-                                <p>{missao_3}</p>
-                            </div>
-                        </div>                      
-                        """
-            if num_usuarios == 0:
-                usuarios_encontrados = """
-                <h2 class="sem__usuarios">Nenhum usuário encontrado para essa cidade.</h2>
-                """
+        usuarios = user_dao.listar_usuarios() or []
+        num_usuarios = 0
+        usuarios_encontrados = ""
 
-            html = f"""
-            <!DOCTYPE html>
-            <html lang="pt-br">
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>Usuários | SoulUp Society</title>
-                <style>
-                    * {{
-                        box-sizing: border-box;
-                        margin: 0;
-                        padding: 0;
-                    }}
-
-                    body {{
-                        min-height: 100vh;
-                        display: flex;
-                        flex-direction: column;
-                        background: #f5f7fa;
-                        color: #2d3748;
-                        font-family: Arial, Helvetica, sans-serif;
-                        line-height: 1.6;
-                    }}
-
-                    header {{
-                        background: #2b3544;
-                        color: #e2e8f0;
-                        text-align: center;
-                        padding: 32px 16px;
-                    }}
-
-                    header h1 {{
-                        color: #ffffff;
-                        margin-bottom: 12px;
-                    }}
-
-                    header p {{
-                        max-width: 640px;
-                        margin: 0 auto 8px;
-                    }}
-
-                    main {{
-                        flex: 1;
-                        width: 100%;
-                        max-width: 900px;
-                        margin: 0 auto;
-                        padding: 24px 16px 40px;
-                        display: flex;
-                        flex-wrap: wrap;
-                        justify-content: center;
-                        align-items: flex-start;
-                        gap: 24px;
-                    }}
-
-                    .sem__usuarios {{
-                        margin: auto;
-                        text-align: center;
-                        color: #718096;
-                        font-size: 1.3rem;
-                        font-weight: normal;
-                    }}
-
-                    .card__usuario {{
-                        background: #ffffff;
-                        border: 1px solid #e2e8f0;
-                        border-radius: 10px;
-                        padding: 20px;
-                        flex: 0 1 calc(50% - 12px); /* 2 por linha, descontando metade do gap */
-                        margin-top: 0;
-                        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
-                    }}
-
-                    .card__usuario h2 {{
-                        font-size: 1.2rem;
-                        color: #4c51bf;
-                        margin-bottom: 8px;
-                    }}
-
-                    .card__usuario h3 {{
-                        font-size: 1rem;
-                        margin-bottom: 6px;
-                    }}
-
-                    .card__usuario > div {{
-                        margin-top: 16px;
-                        padding: 12px 16px;
-                        background: #f7fafc;
-                        border-radius: 8px;
-                    }}
-
-                    .carteira {{
-                        border-left: 4px solid #48bb78;
-                    }}
-
-                    .card__usuario > div:not(.carteira) {{
-                        border-left: 4px solid #667eea;
-                    }}
-
-                    .rodape {{
-                        text-align: center;
-                        padding: 16px;
-                        font-size: 0.85rem;
-                        color: #cbd5e0;
-                        background: #2b3544;
-                    }}
-
-                    @media (max-width: 700px) {{
-                        .card__usuario {{
-                        flex-basis: 100%;
-                    }}
-                }}
-                </style>
-            </head>
-            <body>
-                <header>
-
-                    <h1>SoulUp Society - Usuários</h1>
-                    <p>Abaixo você poderá conferir cards com os dados de todos os usuários cadastrados até o momento na SoulUp Society!</p>
-                    <p>Atualmente existem {num_usuarios} usuários cadastrados!</p>
-                
-                </header>
-                <main>
-                    {usuarios_encontrados}
-
-                </main>
-                <footer class="rodape">
-                    <p>Todos os direitos reservados - SoulUp Society - &copy; - 2026</p>
-                </footer>
-            </body>
-            </html>
+        for usuario in usuarios:
+                id_usuario = usuario[0]
+                username = usuario[1]
+                email = usuario[3]
+                quantidade_pontos = usuario[4]
+                quantidade_passagens = usuario[5]
+                quantidade_vales = usuario[6]
+                saldo = usuario[7]
+                limite = usuario[8]
+                missoes = user_dao.listar_missoes(id_usuario) or []
+                if missoes:
+                    missoes_html = "".join(f"<p>{escape(str(m))}</p>" for m in missoes[:3])
+                else: 
+                    missoes_html = "<p>Este usuário não possui missões.</p>"
+                    
+                    num_usuarios += 1
+                    usuarios_encontrados += f"""
+                    <div class="card__usuario">
+                        <h2>Nome de usuário: {username}</h2>
+                        <p>Id do usuário: {id_usuario}</p>
+                        <p>Email: {email}</p>
+                        <div class="carteira">
+                            <h3>Carteira</h3>
+                            <p>Quantidade de pontos: {quantidade_pontos}</p>
+                            <p>Quantidade de passagens: {quantidade_passagens}</p>
+                            <p>Quantidade de vales: {quantidade_vales}</p>
+                            <p>Saldo: R${saldo:.2f}</p>
+                            <p>Limite de passagens: {limite}/10</p>
+                        </div>
+                        <div>
+                            <h3>Missões</h3>
+                            {missoes_html}
+                        </div>
+                    </div>                      
+                    """
+        if num_usuarios == 0:
+            usuarios_encontrados = """
+            <h2 class="sem__usuarios">Nenhum usuário encontrado.</h2>
             """
 
-            with open("usuarios_soulup_society.html", "w",encoding="utf-8") as arquivo:
-                arquivo.write(html)
+        html = f"""
+        <!DOCTYPE html>
+        <html lang="pt-br">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Usuários | SoulUp Society</title>
+            <style>
+                * {{
+                    box-sizing: border-box;
+                    margin: 0;
+                    padding: 0;
+                }}
 
-            arquivo_html = Path("usuarios_soulup_society.html").resolve()
-            endereco = arquivo_html.as_uri()
-            webbrowser.open(endereco)
-            print("\nO arquivo 'usuarios_soulup_society.html' foi gerado com sucesso!")
-            print("Abrindo a página no navegador...")
+                body {{
+                    min-height: 100vh;
+                    display: flex;
+                    flex-direction: column;
+                    background: #f5f7fa;
+                    color: #2d3748;
+                    font-family: Arial, Helvetica, sans-serif;
+                    line-height: 1.6;
+                }}
+
+                header {{
+                    background: #2b3544;
+                    color: #e2e8f0;
+                    text-align: center;
+                    padding: 32px 16px;
+                }}
+
+                header h1 {{
+                    color: #ffffff;
+                    margin-bottom: 12px;
+                }}
+
+                header p {{
+                    max-width: 640px;
+                    margin: 0 auto 8px;
+                }}
+
+                main {{
+                    flex: 1;
+                    width: 100%;
+                    max-width: 900px;
+                    margin: 0 auto;
+                    padding: 24px 16px 40px;
+                    display: flex;
+                    flex-wrap: wrap;
+                    justify-content: center;
+                    align-items: flex-start;
+                    gap: 24px;
+                }}
+
+                .sem__usuarios {{
+                    margin: auto;
+                    text-align: center;
+                    color: #718096;
+                    font-size: 1.3rem;
+                    font-weight: normal;
+                }}
+
+                .card__usuario {{
+                    background: #ffffff;
+                    border: 1px solid #e2e8f0;
+                    border-radius: 10px;
+                    padding: 20px;
+                    flex: 0 1 calc(50% - 12px); /* 2 por linha, descontando metade do gap */
+                    margin-top: 0;
+                    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+                }}
+
+                .card__usuario h2 {{
+                    font-size: 1.2rem;
+                    color: #4c51bf;
+                    margin-bottom: 8px;
+                }}
+
+                .card__usuario h3 {{
+                    font-size: 1rem;
+                    margin-bottom: 6px;
+                }}
+
+                .card__usuario > div {{
+                    margin-top: 16px;
+                    padding: 12px 16px;
+                    background: #f7fafc;
+                    border-radius: 8px;
+                }}
+
+                .carteira {{
+                    border-left: 4px solid #48bb78;
+                }}
+
+                .card__usuario > div:not(.carteira) {{
+                    border-left: 4px solid #667eea;
+                }}
+
+                .rodape {{
+                    text-align: center;
+                    padding: 16px;
+                    font-size: 0.85rem;
+                    color: #cbd5e0;
+                    background: #2b3544;
+                }}
+
+                @media (max-width: 700px) {{
+                    .card__usuario {{
+                    flex-basis: 100%;
+                }}
+            }}
+            </style>
+        </head>
+        <body>
+            <header>
+
+                <h1>SoulUp Society - Usuários</h1>
+                <p>Abaixo você poderá conferir cards com os dados de todos os usuários cadastrados até o momento na SoulUp Society!</p>
+                <p>Atualmente existem {num_usuarios} usuários cadastrados!</p>
+            
+            </header>
+            <main>
+                {usuarios_encontrados}
+
+            </main>
+            <footer class="rodape">
+                <p>Todos os direitos reservados - SoulUp Society - &copy; - 2026</p>
+            </footer>
+        </body>
+        </html>
+        """
+
+        with open("usuarios_soulup_society.html", "w",encoding="utf-8") as arquivo:
+            arquivo.write(html)
+
+        arquivo_html = Path("usuarios_soulup_society.html").resolve()
+        endereco = arquivo_html.as_uri()
+        webbrowser.open(endereco)
+        print("\nO arquivo 'usuarios_soulup_society.html' foi gerado com sucesso!")
+        print("Abrindo a página no navegador...")
 
     except OSError as erro:
-                    print("Ocorreu um erro durante a criação do arquivo: ", erro)
+        print("Ocorreu um erro durante a criação do arquivo: ", erro)
 
 usuario_atual = None
 login = False
