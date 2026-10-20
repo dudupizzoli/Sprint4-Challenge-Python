@@ -1,7 +1,6 @@
 from conexaoOracle.conexaodb import Conexaodb
-from models.usuario import Usuario
 import oracledb
-
+#CORREÇÃO QUASE FINALIZADA
 class PostagemDAO:
     def __init__(self):
         self.conexao = Conexaodb(
@@ -15,7 +14,8 @@ class PostagemDAO:
     def fazer_postagem(self, id_usuario, postagem):
         conn = self.conexao.conectar()
         if conn is None:
-            return "Erro ao conectar ao Oracle."
+            print("Erro ao conectar ao Oracle.")
+            return False
 
         cursor = conn.cursor()
         sql = """insert into posts_soulup (id_usuario, texto) 
@@ -39,7 +39,8 @@ class PostagemDAO:
     def listar_postagens(self, id_usuario):
         conn = self.conexao.conectar()
         if conn is None:
-            return "Erro ao conectar ao Oracle."
+            print("Erro ao conectar ao Oracle.")
+            return False
 
         cursor = conn.cursor()
 
@@ -69,7 +70,8 @@ class PostagemDAO:
     def buscar_id_postagem(self, id_postagem):
         conn = self.conexao.conectar()
         if conn is None:
-            return "Erro ao conectar ao Oracle." 
+            print("Erro ao conectar ao Oracle.")
+            return False
         
         cursor = conn.cursor()
         sql = """select id_post, id_usuario, texto from posts_soulup where id_post = :id_post"""
@@ -96,18 +98,23 @@ class PostagemDAO:
             return None
 
         else:
-                
-            conn = self.conexao.conectar()
-            if conn is None:
-                return "Erro ao conectar ao Oracle."
 
             texto = input("Digite o novo texto da postagem: ")
             if texto == "":
                 print("A postagem não pode ficar vazia.")
+                return None
+            if len(texto) > 350:
+                print("A postagem não pode conter mais do que 350 caracteres.")
+                return None
+            
+            conn = self.conexao.conectar()
+            if conn is None:
+                print("Erro ao conectar ao Oracle.")
+                return False
 
             cursor = conn.cursor()
             sql = """update posts_soulup 
-                    set texto = :texto, 
+                    set texto = :texto 
                     where id_post = :id_post 
                     """
 
@@ -115,7 +122,8 @@ class PostagemDAO:
                 cursor.execute(sql, texto=texto, id_post=id_postagem)
                 conn.commit()
                 print("Postagem editada com sucesso!")
-                return postagem
+
+                return self.buscar_id_postagem(id_postagem)
             
             except oracledb.Error as erro:
                 conn.rollback()
@@ -134,12 +142,14 @@ class PostagemDAO:
 
             confirmacao = input("Você realmente deseja excluir esta postagem? (S para Sim/N para Não)").upper().strip()
             if confirmacao == "N":
-                return "A exclusão foi cancelada com sucesso!"
+                print("A exclusão foi cancelada com sucesso!")
+                return False
             elif confirmacao == "S":
 
                 conn = self.conexao.conectar()
                 if conn is None:
-                    return "Erro ao conectar ao Oracle."
+                    print("Erro ao conectar ao Oracle.")
+                    return False
 
                 cursor = conn.cursor()
                 sql = """delete from posts_soulup where id_post = :id_post"""

@@ -17,9 +17,9 @@ class UsuarioDAO:
         if conn is None:
             return "Erro ao conectar ao Oracle."
 
-        username = usuario.username
-        senha = usuario.senha
-        email = usuario.email
+        username = usuario._username
+        senha = usuario._senha_user
+        email = usuario._email_user
 
         cursor = conn.cursor()
         sql = """insert into usuarios_soulup (username, senha, email) 
@@ -31,6 +31,12 @@ class UsuarioDAO:
                            senha = senha,
                            email = email)
             conn.commit()
+
+            cursor.execute("select id_usuario from usuarios_soulup where email = :email", email = email)
+            linha = cursor.fetchone()
+            if linha is not None:
+                usuario._id_usuario = linha[0]
+
             print("Cadastro realizado com sucesso!")
 
         except oracledb.Error as erro:
@@ -44,7 +50,8 @@ class UsuarioDAO:
     def listar_usuarios(self):
         conn = self.conexao.conectar()
         if conn is None:
-            return "Erro ao conectar ao Oracle." 
+            print("Erro ao conectar ao Oracle.")
+            return False
 
         cursor = conn.cursor()
         sql = """select id_usuario, username, senha, email, pontos, passagens, vales, saldo, limite from usuarios_soulup order by id_usuario"""
@@ -59,7 +66,6 @@ class UsuarioDAO:
 
         except oracledb.Error as erro:
             print("Houve um erro: ", erro)
-            usuarios = []
                 
         finally:
             cursor.close()
@@ -68,7 +74,8 @@ class UsuarioDAO:
     def buscar_nome_usuario(self, username):
         conn = self.conexao.conectar()
         if conn is None:
-            return "Erro ao conectar ao Oracle." 
+            print("Erro ao conectar ao Oracle.")
+            return False
         
         cursor = conn.cursor()
         sql = """select id_usuario, username, senha, email, pontos, passagens, vales, saldo, limite from usuarios_soulup where username = :username"""
@@ -99,9 +106,6 @@ class UsuarioDAO:
             senha = input("Digite a senha da conta a ser editada: ").strip()
 
             if senha == usuario[2]:
-                conn = self.conexao.conectar()
-                if conn is None:
-                    return "Erro ao conectar ao Oracle."
 
                 username = input(f"Seu nome de usuário atual é: {usuario[1]}, caso não queira mudá-lo, aperte enter. Digite seu novo nome de usuário: ").strip()
                 email = input(f"Seu email atual é: {usuario[3]}, caso não queira mudá-lo, aperte enter. Digite seu novo email: ").strip()
@@ -112,8 +116,14 @@ class UsuarioDAO:
                 if email == '':
                     email = usuario[3]
 
-                if email != '' and "@" not in email or len(email) < 8:
+                if "@" not in email or len(email) < 8:
                     print("O email precisa ter @ e não pode ter menos de 8 caracteres.")
+                    return False
+
+                conn = self.conexao.conectar()
+                if conn is None:
+                    print("Erro ao conectar ao Oracle.")
+                    return False
 
                 cursor = conn.cursor()
                 sql = """update usuarios_soulup 
@@ -126,7 +136,8 @@ class UsuarioDAO:
                     cursor.execute(sql, username=username, email=email, nome_usuario=nome_usuario)
                     conn.commit()
                     print("Usuário editado com sucesso!")
-                    return usuario
+
+                    return self.buscar_nome_usuario(username)
                 except oracledb.Error as erro:
                     conn.rollback()
                     print("Houve um erro: ", erro)
@@ -136,28 +147,40 @@ class UsuarioDAO:
 
             else:
                 print("Senha incorreta. Não foi possível editar o usuário.")
+                return False
 
     def excluir_usuario(self, username):
         usuario = self.buscar_nome_usuario(username)
-
+        if usuario is None:
+            print("Nenhum usuário foi encontrado.")
+            return False
+        
         confirmacao = input("A exclusão de uma conta é uma ação perigosa e potencialmente irreversível. Você realmente deseja excluir esta conta? (S para Sim/N para Não)").upper().strip()
         if confirmacao == "N":
-            return "A exclusão foi cancelada com sucesso!"
+            print("A exclusão foi cancelada com sucesso!")
+            return False
+        
         elif confirmacao == "S":
             senha = input("Digite a senha da conta a ser excluída: ").strip()
 
             if senha == usuario[2]:
                 conn = self.conexao.conectar()
                 if conn is None:
-                    return "Erro ao conectar ao Oracle."
+                    print("Erro ao conectar ao Oracle.")
+                    return False
 
                 cursor = conn.cursor()
                 sql = """delete from usuarios_soulup where username = :username"""
+                sql_missoes = """delete from missoes_usuario where id_usuario = :id_usuario"""
+                sql_postagens = """delete from posts_soulup where id_usuario = :id_usuario"""
 
                 try:
+                    cursor.execute(sql_missoes, id_usuario=usuario[0])
+                    cursor.execute(sql_postagens, id_usuario=usuario[0])
                     cursor.execute(sql, username=username)
                     conn.commit()
                     print("A conta foi excluída com sucesso!")
+                    return True
                 except oracledb.Error as erro:
                     conn.rollback()
                     print("Houve um erro: ", erro)
@@ -167,17 +190,20 @@ class UsuarioDAO:
 
             else:
                 print("Senha incorreta. Não foi possível excluir o usuário.")
+                return False
         else:
             print("Digite apenas S ou N.")
+            return False
 
     def validar_login(self, email, senha):
         conn = self.conexao.conectar()
         if conn is None:
-            return "Erro ao conectar ao Oracle."
+            print("Erro ao conectar ao Oracle.")
+            return False
         
         cursor = conn.cursor()
         sql = """
-            select id_usuario, username, senha, email, pontos, passagens, vales, saldo, limite from usuarios_soulup
+            select id_usuario, username, senha, email, pontos, passagens, saldo, vales, limite from usuarios_soulup
             where email = :email and senha = :senha
             """
 
@@ -185,13 +211,14 @@ class UsuarioDAO:
             cursor.execute(sql, {"email": email, "senha": senha})
             usuario_validado = cursor.fetchone()
 
-            usuario = Usuario(usuario_validado[1], usuario_validado[2], usuario_validado[3], usuario_validado[4], usuario_validado[5], 
-                              usuario_validado[6], usuario_validado[7], usuario_validado[8], usuario_validado[0])
+            usuario = Usuario(username=usuario_validado[1], senha_user=usuario_validado[2], email_user=usuario_validado[3], pontos=usuario_validado[4],
+                              passagens=usuario_validado[5], saldo=usuario_validado[6], vales=usuario_validado[7], limite=usuario_validado[8], id_usuario=usuario_validado[0])
 
             return usuario
 
         except oracledb.Error as erro:
             print("Houve um erro: ", erro)
+            return None
         
         finally:
             cursor.close()
@@ -200,7 +227,8 @@ class UsuarioDAO:
     def adicionar_missoes(self, id_usuario, missoes):
         conn = self.conexao.conectar()
         if conn is None:
-            return "Erro ao conectar ao Oracle."
+            print("Erro ao conectar ao Oracle.")
+            return False
 
         cursor = conn.cursor()
 
@@ -228,7 +256,8 @@ class UsuarioDAO:
     def listar_missoes(self, id_usuario):
         conn = self.conexao.conectar()
         if conn is None:
-            return "Erro ao conectar ao Oracle."
+            print("Erro ao conectar ao Oracle.")
+            return False
 
         cursor = conn.cursor()
 
@@ -259,7 +288,8 @@ class UsuarioDAO:
     def atualizar_qtd_pontos(self, id_usuario, nova_qtd_pontos):
         conn = self.conexao.conectar()
         if conn is None:
-            return "Erro ao conectar ao Oracle."
+            print("Erro ao conectar ao Oracle.")
+            return False
         
         cursor = conn.cursor()
         
@@ -284,7 +314,8 @@ class UsuarioDAO:
     def atualizar_saldo(self, id_usuario, novo_saldo):
         conn = self.conexao.conectar()
         if conn is None:
-            return "Erro ao conectar ao Oracle."
+            print("Erro ao conectar ao Oracle.")
+            return False
         
         cursor = conn.cursor()
         
@@ -309,7 +340,8 @@ class UsuarioDAO:
     def atualizar_passagens(self, id_usuario, novas_passagens):
         conn = self.conexao.conectar()
         if conn is None:
-            return "Erro ao conectar ao Oracle."
+               print("Erro ao conectar ao Oracle.")
+               return False
         
         cursor = conn.cursor()
         
@@ -334,7 +366,8 @@ class UsuarioDAO:
     def atualizar_vales(self, id_usuario, novos_vales):
         conn = self.conexao.conectar()
         if conn is None:
-            return "Erro ao conectar ao Oracle."
+            print("Erro ao conectar ao Oracle.")
+            return False
         
         cursor = conn.cursor()
         
@@ -356,3 +389,28 @@ class UsuarioDAO:
             cursor.close()
             conn.close() 
 
+    def atualizar_limite(self, id_usuario, novo_limite):
+        conn = self.conexao.conectar()
+        if conn is None:
+            print("Erro ao conectar ao Oracle.")
+            return False
+
+        cursor = conn.cursor()
+
+        sql = """
+            update usuarios_soulup
+            set limite = :novo_limite
+            where id_usuario = :id_usuario
+            """
+
+        try:
+            cursor.execute(sql, novo_limite=novo_limite, id_usuario=id_usuario)
+            conn.commit()
+
+        except oracledb.Error as erro:
+            conn.rollback()
+            print("Houve um erro: ", erro)
+
+        finally:
+            cursor.close()
+            conn.close()

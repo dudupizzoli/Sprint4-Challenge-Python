@@ -80,7 +80,6 @@ def exportar_json():
     except OSError as erro:
                     print("Ocorreu um erro durante a criação do arquivo: ", erro)
                     
-#REVISAR ESSA FUNÇÃO DEPOIS
 def exportar_html():
     try:
         usuarios = user_dao.listar_usuarios() or []
@@ -330,7 +329,7 @@ while not login:
                 except ValueError as erro:
                     print("Ocorreu um erro: ", erro)
 
-        case 0:
+        case 3:
             print("Encerrando sistema...")
             break
         
@@ -547,7 +546,7 @@ while opcao != 0:
                             print("ID do usuário: ", post[1])
                             print("Post: ", post[2])  
 
-                            user_dao.excluir_usuario(postagem_excluida)                               
+                            post_dao.excluir_postagem(postagem_excluida)                               
 
                     case 6:
                         print("Voltando ao menu anterior...")
