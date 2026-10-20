@@ -38,6 +38,7 @@ class UsuarioDAO:
                 usuario._id_usuario = linha[0]
 
             print("Cadastro realizado com sucesso!")
+            return True
 
         except oracledb.Error as erro:
             conn.rollback()

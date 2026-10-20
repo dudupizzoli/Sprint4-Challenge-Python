@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 import webbrowser
 from html import escape
+import sys
 
 user_dao = UsuarioDAO()
 post_dao = PostagemDAO()
@@ -28,6 +29,13 @@ def ler_inteiro(mensagem):
                 return valor
         except ValueError as erro:
             print("Ocorreu um erro: ", erro, ". Digite apenas números válidos.")
+
+def validar_credenciais(email, senha):
+    if len(senha) < 4 or " " in senha:
+        raise ValueError("Sua senha precisa ter ao menos 4 caracteres e nenhum espaço.")
+    if "@" not in email or len(email) < 8:
+        raise ValueError("O email precisa ter @ e não pode ter menos de 8 caracteres.")
+
 
 def conversao_dinheiro(pontos):  #Função responsável por converter pontos em dinheiro, tanto para a simulação quanto para o bilhete único em si
     #Recebe como parâmetro a quantidade de pontos inserida pelo usuário, verifica sua validade, e então retorna o valor em dinheiro
@@ -56,7 +64,7 @@ def conversao_vales(vales):  #Função responsável por converter pontos em desc
 def exportar_json():
     try:
         usuarios = user_dao.listar_usuarios()
-        if usuarios == None:
+        if usuarios is None:
             raise OSError("Nenhum usuário foi encontrado para a exportação.")
         else:
             lista_usuarios = []
@@ -87,40 +95,40 @@ def exportar_html():
         usuarios_encontrados = ""
 
         for usuario in usuarios:
-                id_usuario = usuario[0]
-                username = usuario[1]
-                email = usuario[3]
-                quantidade_pontos = usuario[4]
-                quantidade_passagens = usuario[5]
-                quantidade_vales = usuario[6]
-                saldo = usuario[7]
-                limite = usuario[8]
-                missoes = user_dao.listar_missoes(id_usuario) or []
-                if missoes:
-                    missoes_html = "".join(f"<p>{escape(str(m))}</p>" for m in missoes[:3])
-                else: 
-                    missoes_html = "<p>Este usuário não possui missões.</p>"
+            id_usuario = usuario[0]
+            username = escape(str(usuario[1]))
+            email = escape(str(usuario[3]))
+            quantidade_pontos = usuario[4]
+            quantidade_passagens = usuario[5]
+            quantidade_vales = usuario[6]
+            saldo = usuario[7]
+            limite = usuario[8]
+            missoes = user_dao.listar_missoes(id_usuario) or []
+            if missoes:
+                missoes_html = "".join(f"<p>{escape(str(m))}</p>" for m in missoes[:3])
+            else: 
+                missoes_html = "<p>Este usuário não possui missões.</p>"
                     
-                    num_usuarios += 1
-                    usuarios_encontrados += f"""
-                    <div class="card__usuario">
-                        <h2>Nome de usuário: {username}</h2>
-                        <p>Id do usuário: {id_usuario}</p>
-                        <p>Email: {email}</p>
-                        <div class="carteira">
-                            <h3>Carteira</h3>
-                            <p>Quantidade de pontos: {quantidade_pontos}</p>
-                            <p>Quantidade de passagens: {quantidade_passagens}</p>
-                            <p>Quantidade de vales: {quantidade_vales}</p>
-                            <p>Saldo: R${saldo:.2f}</p>
-                            <p>Limite de passagens: {limite}/10</p>
-                        </div>
-                        <div>
-                            <h3>Missões</h3>
-                            {missoes_html}
-                        </div>
-                    </div>                      
-                    """
+            num_usuarios += 1
+            usuarios_encontrados += f"""
+            <div class="card__usuario">
+                <h2>Nome de usuário: {username}</h2>
+                <p>Id do usuário: {id_usuario}</p>
+                <p>Email: {email}</p>
+                <div class="carteira">
+                    <h3>Carteira</h3>
+                    <p>Quantidade de pontos: {quantidade_pontos}</p>
+                    <p>Quantidade de passagens: {quantidade_passagens}</p>
+                    <p>Quantidade de vales: {quantidade_vales}</p>
+                    <p>Saldo: R${saldo:.2f}</p>
+                    <p>Limite de passagens: {limite}/10</p>
+                </div>
+                <div>
+                    <h3>Missões</h3>
+                    {missoes_html}
+                </div>
+            </div>                      
+            """
         if num_usuarios == 0:
             usuarios_encontrados = """
             <h2 class="sem__usuarios">Nenhum usuário encontrado.</h2>
@@ -293,18 +301,17 @@ while not login:
                 username = validar_texto("Digite seu nome de usuário: ")
                 email = validar_texto("Digite seu email: ")
                 senha = validar_texto("Sua senha precisa conter ao menos 4 caracteres e não pode ter espaços. Digite sua senha: ")
-                if len(senha) < 4 or " " in senha:
-                    raise ValueError("Sua senha precisa ter ao menos 4 caracteres e nenhum espaço.")
-                if "@" not in email or len(email) < 8:
-                    raise ValueError("O email precisa ter @ e não pode ter menos de 8 caracteres.")
+                validar_credenciais(email, senha)
                 novo_usuario = Usuario(username, senha, email)
                 Usuario.definir_missoes(novo_usuario)
-                user_dao.cadastrar_usuario(novo_usuario)
-                user_dao.adicionar_missoes(novo_usuario._id_usuario, novo_usuario._missoes)
 
-                usuario_atual = novo_usuario
-                print("Agora você está logado com: ", usuario_atual._username)     
-                login = True          
+                if user_dao.cadastrar_usuario(novo_usuario):
+                    user_dao.adicionar_missoes(novo_usuario._id_usuario, novo_usuario._missoes)
+
+                    usuario_atual = user_dao.validar_login(email, senha)
+                    if usuario_atual is not None:
+                        print("Agora você está logado com: ", usuario_atual._username)     
+                        login = True  
             except ValueError as erro:
                 print("Ocorreu um erro: ", erro)
 
@@ -312,10 +319,7 @@ while not login:
                 try:
                     email = validar_texto("Digite seu email: ")
                     senha = validar_texto("Sua senha precisa conter ao menos 4 caracteres e não pode ter espaços. Digite sua senha: ")
-                    if len(senha) < 4 or " " in senha:
-                        raise ValueError("Sua senha precisa ter ao menos 4 caracteres e nenhum espaço.")
-                    if "@" not in email or len(email) < 8:
-                        raise ValueError("O email precisa ter @ e não pode ter menos de 8 caracteres.")
+                    validar_credenciais(email, senha)
                     usuario_validado = user_dao.validar_login(email, senha)
 
                     if usuario_validado is None:
@@ -331,7 +335,7 @@ while not login:
 
         case 3:
             print("Encerrando sistema...")
-            break
+            sys.exit()
         
         case _:
             print("Opção inválida. Digite uma opção válida do menu.")
@@ -426,7 +430,7 @@ while opcao != 0:
                         else:
                             usuario_atual._pontos -= pontos_para_conversao
                             saldo_ganho = conversao_dinheiro(pontos_para_conversao)
-                            usuario_atual._saldo += saldo_ganho
+                            usuario_atual._saldo = round(usuario_atual._saldo + saldo_ganho, 2)
                             user_dao.atualizar_qtd_pontos(usuario_atual._id_usuario, usuario_atual._pontos)
                             user_dao.atualizar_saldo(usuario_atual._id_usuario, usuario_atual._saldo)
                             print(f"Você converteu {pontos_para_conversao} em R$ {saldo_ganho:.2f} com sucesso!")
@@ -437,14 +441,16 @@ while opcao != 0:
                     case 4:
                         passagens_desejadas = ler_inteiro("Insira a quantidade de passagens que você deseja adquirir para o bilhete único: ")
                         custo_em_pontos = conversao_passagem(passagens_desejadas)
-                        if passagens_desejadas > usuario_atual._limite or usuario_atual._saldo < custo_em_pontos:
+                        if passagens_desejadas > usuario_atual._limite or usuario_atual._pontos < custo_em_pontos:
                             print("Não foi possível realizar a conversão. Confira seu limite ou sua quantidade de pontos.")
                         else: 
                             usuario_atual._pontos -= custo_em_pontos
                             usuario_atual._passagens += passagens_desejadas
+                            usuario_atual._limite -= passagens_desejadas
                             user_dao.atualizar_qtd_pontos(usuario_atual._id_usuario, usuario_atual._pontos)
                             user_dao.atualizar_passagens(usuario_atual._id_usuario, usuario_atual._passagens)
-                            print(f"Você converteu {custo_em_pontos} em {passagens_desejadas:.2f} passagens com sucesso!")
+                            user_dao.atualizar_limite(usuario_atual._id_usuario, usuario_atual._limite)
+                            print(f"Você converteu {custo_em_pontos} em {passagens_desejadas} passagens com sucesso!")
 
                     case 5:
                         print(f"Atualmente, você possui {usuario_atual._passagens} passagem(ns) no bilhete único.")
@@ -455,14 +461,14 @@ while opcao != 0:
                         else:
                             vales_desejados = ler_inteiro("Insira a quantidade de vales que você deseja adquirir para o bilhete único: ") 
                             custo_em_pontos = conversao_vales(vales_desejados)
-                            if usuario_atual._saldo < custo_em_pontos:
+                            if usuario_atual._pontos < custo_em_pontos:
                                 print("Não foi possível realizar a conversão. Confira sua quantidade de pontos.") 
                             else:
                                 usuario_atual._pontos -= custo_em_pontos
                                 usuario_atual._vales += vales_desejados
                                 user_dao.atualizar_qtd_pontos(usuario_atual._id_usuario, usuario_atual._pontos)
                                 user_dao.atualizar_vales(usuario_atual._id_usuario, usuario_atual._vales)
-                                print(f"Você converteu {custo_em_pontos} em {vales_desejados:.2f} vales com sucesso!")
+                                print(f"Você converteu {custo_em_pontos} pontos em {vales_desejados} vales com sucesso!")
 
                     case 7:
                         print(f"Atualmente você possui {usuario_atual._vales} vale(s) no bilhete único.")
@@ -514,37 +520,47 @@ while opcao != 0:
                                 print("Post: ", post[2]) 
 
                     case 3:
-                        postagem_procurada = ler_inteiro("Digite o ID da postagem que você deseja buscar.")
+                        postagem_procurada = ler_inteiro("Digite o ID da postagem que você deseja buscar: ")
                         postagem = post_dao.buscar_id_postagem(postagem_procurada)
                         if postagem is None:
                             print("Nenhuma postagem foi encontrada.")
                         else:
                             print("\n========================")
-                            print("ID da postagem: ", post[0])
-                            print("ID do usuário: ", post[1])
-                            print("Post: ", post[2])      
+                            print("ID da postagem: ", postagem[0])
+                            print("ID do usuário: ", postagem[1])
+                            print("Post: ", postagem[2])      
 
                     case 4:
                         postagem_editada = ler_inteiro("Digite o ID da postagem que você deseja editar: ")
-                        postagem = post_dao.editar_postagem(postagem_editada)
-                        if postagem is None:
-                            print("Nenhuma usuária foi encontrada.")
+                        postagem_encontrada = post_dao.buscar_id_postagem(postagem_editada)
+                        if postagem_encontrada is None:
+                            print("Nenhuma postagem foi encontrada.")
+
+                        elif postagem_encontrada[1] != usuario_atual._id_usuario:
+                            print("Não é possível editar as postagens de outros usuários.")
+
                         else:
-                            print("\n========================")
-                            print("ID da postagem: ", post[0])
-                            print("ID do usuário: ", post[1])
-                            print("Post: ", post[2])     
+                            postagem = post_dao.editar_postagem(postagem_editada)
+                            if postagem is not None:
+                                print("\n========================")
+                                print("ID da postagem: ", postagem[0])
+                                print("ID do usuário: ", postagem[1])
+                                print("Post: ", postagem[2])    
 
                     case 5:
-                        postagem_excluida = validar_texto("Digite o ID da postagem que você deseja excluir: ")
+                        postagem_excluida = ler_inteiro("Digite o ID da postagem que você deseja excluir: ")
                         postagem = post_dao.buscar_id_postagem(postagem_excluida)
-                        if usuario is None:
+                        if postagem is None:
                             print("Nenhuma postagem foi encontrada.")
+
+                        elif postagem[1] != usuario_atual._id_usuario:
+                            print("Não é possível excluir as postagens de outros usuários.")
+
                         else:
                             print("\n========================")
-                            print("ID da postagem: ", post[0])
-                            print("ID do usuário: ", post[1])
-                            print("Post: ", post[2])  
+                            print("ID da postagem: ", postagem[0])
+                            print("ID do usuário: ", postagem[1])
+                            print("Post: ", postagem[2])  
 
                             post_dao.excluir_postagem(postagem_excluida)                               
 
@@ -581,11 +597,7 @@ while opcao != 0:
                             try:
                                 email = validar_texto("Digite seu email: ")
                                 senha = validar_texto("Sua senha precisa conter ao menos 4 caracteres e não pode ter espaços. Digite sua senha: ")
-                                if len(senha) < 4 or " " in senha:
-                                    raise ValueError("Sua senha precisa ter ao menos 4 caracteres e nenhum espaço.")
-                                if "@" not in email or len(email) < 8:
-                                    raise ValueError("O email precisa ter @ e não pode ter menos de 8 caracteres.")
-                                usuario_validado = user_dao.validar_login(email, senha)
+                                validar_credenciais(email, senha)
 
                                 if usuario_validado is None:
                                     raise ValueError("Email ou senha incorretos.")        
@@ -603,14 +615,12 @@ while opcao != 0:
                             username = validar_texto("Digite seu nome de usuário: ")
                             email = validar_texto("Digite seu email: ")
                             senha = validar_texto("Sua senha precisa conter ao menos 4 caracteres e não pode ter espaços. Digite sua senha: ")
+                            validar_credenciais(email, senha)
 
-                            if len(senha) < 4 or " " in senha:
-                                raise ValueError("Sua senha precisa ter ao menos 4 caracteres e nenhum espaço.")
-                            if "@" not in email or len(email) < 8:
-                                raise ValueError("O email precisa ter @ e não pode ter menos de 8 caracteres.")
-                            
                             novo_usuario = Usuario(username, senha, email)
-                            user_dao.cadastrar_usuario(novo_usuario)
+                            Usuario.definir_missoes(novo_usuario)
+                            if user_dao.cadastrar_usuario(novo_usuario):
+                                user_dao.adicionar_missoes(novo_usuario._id_usuario, novo_usuario._missoes)
                         except ValueError as erro:
                             print("Ocorreu um erro: ", erro)
 
@@ -652,6 +662,10 @@ while opcao != 0:
                         if usuario is None:
                             print("Nenhum usuário foi encontrado.")
                         else:
+                            if usuario[0] == usuario_atual._id_usuario:
+                                usuario_atual._username = usuario[1]
+                                usuario_atual._email_user = usuario[3]
+
                             print("\n========================")
                             print("ID do usuário: ", usuario[0])
                             print("Username: ", usuario[1])
@@ -678,7 +692,11 @@ while opcao != 0:
                             print("Saldo: ", usuario[7])
                             print("Limite: ", usuario[8])  
 
-                            user_dao.excluir_usuario(usuario_excluido)                           
+                            conta_excluida = user_dao.excluir_usuario(usuario_excluido)
+                            if conta_excluida and usuario[0] == usuario_atual._id_usuario:
+                                print("Sua conta foi excluída. Encerrando sistema...")
+                                opcao = 0
+                                break                      
 
                     case 8:
                         print("Voltando ao menu anterior...")
