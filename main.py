@@ -375,7 +375,7 @@ while opcao != 0:
                 match opcao_geral:
                     case 1:
                         missoes_usuario_atual = user_dao.listar_missoes(usuario_atual._id_usuario)
-                        if missoes_usuario_atual == None:
+                        if missoes_usuario_atual is None:
                             print("Você não possui nenhuma missão")
                         else:
                             for missao in missoes_usuario_atual:
@@ -599,6 +599,8 @@ while opcao != 0:
                                 senha = validar_texto("Sua senha precisa conter ao menos 4 caracteres e não pode ter espaços. Digite sua senha: ")
                                 validar_credenciais(email, senha)
 
+                                usuario_validado = user_dao.validar_login(email, senha)
+
                                 if usuario_validado is None:
                                     raise ValueError("Email ou senha incorretos.")        
                                 else: 
@@ -626,7 +628,7 @@ while opcao != 0:
 
                     case 4:
                         usuarios = user_dao.listar_usuarios()
-                        if usuarios == None:
+                        if usuarios is None:
                             print("Nenhum usuário cadastrado.")
                         else:
                             for usuario in usuarios:
@@ -660,7 +662,7 @@ while opcao != 0:
                         usuario_editado = validar_texto("Digite o nome do usuário que você deseja editar: ")
                         usuario = user_dao.editar_usuario(usuario_editado)
                         if usuario is None:
-                            print("Nenhum usuário foi encontrado.")
+                            print("Não foi possível editar o usuário.")
                         else:
                             if usuario[0] == usuario_atual._id_usuario:
                                 usuario_atual._username = usuario[1]

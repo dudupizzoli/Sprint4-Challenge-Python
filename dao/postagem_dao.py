@@ -1,6 +1,6 @@
 from conexaoOracle.conexaodb import Conexaodb
 import oracledb
-#CORREÇÃO QUASE FINALIZADA
+
 class PostagemDAO:
     def __init__(self):
         self.conexao = Conexaodb(
@@ -40,7 +40,7 @@ class PostagemDAO:
         conn = self.conexao.conectar()
         if conn is None:
             print("Erro ao conectar ao Oracle.")
-            return False
+            return None
 
         cursor = conn.cursor()
 
@@ -71,7 +71,7 @@ class PostagemDAO:
         conn = self.conexao.conectar()
         if conn is None:
             print("Erro ao conectar ao Oracle.")
-            return False
+            return None
         
         cursor = conn.cursor()
         sql = """select id_post, id_usuario, texto from posts_soulup where id_post = :id_post"""
@@ -99,7 +99,7 @@ class PostagemDAO:
 
         else:
 
-            texto = input("Digite o novo texto da postagem: ")
+            texto = input("Digite o novo texto da postagem: ").strip()
             if texto == "":
                 print("A postagem não pode ficar vazia.")
                 return None
@@ -110,7 +110,7 @@ class PostagemDAO:
             conn = self.conexao.conectar()
             if conn is None:
                 print("Erro ao conectar ao Oracle.")
-                return False
+                return None
 
             cursor = conn.cursor()
             sql = """update posts_soulup 

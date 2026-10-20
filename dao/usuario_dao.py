@@ -15,7 +15,8 @@ class UsuarioDAO:
     def cadastrar_usuario(self, usuario):
         conn = self.conexao.conectar()
         if conn is None:
-            return "Erro ao conectar ao Oracle."
+            print("Erro ao conectar ao Oracle.")
+            return False
 
         username = usuario._username
         senha = usuario._senha_user
@@ -43,6 +44,7 @@ class UsuarioDAO:
         except oracledb.Error as erro:
             conn.rollback()
             print("\nHouve um erro: ", erro)
+            return False
     
         finally:
             cursor.close()
@@ -52,7 +54,7 @@ class UsuarioDAO:
         conn = self.conexao.conectar()
         if conn is None:
             print("Erro ao conectar ao Oracle.")
-            return False
+            return None
 
         cursor = conn.cursor()
         sql = """select id_usuario, username, senha, email, pontos, passagens, vales, saldo, limite from usuarios_soulup order by id_usuario"""
@@ -76,7 +78,7 @@ class UsuarioDAO:
         conn = self.conexao.conectar()
         if conn is None:
             print("Erro ao conectar ao Oracle.")
-            return False
+            return None
         
         cursor = conn.cursor()
         sql = """select id_usuario, username, senha, email, pontos, passagens, vales, saldo, limite from usuarios_soulup where username = :username"""
@@ -119,7 +121,7 @@ class UsuarioDAO:
 
                 if "@" not in email or len(email) < 8:
                     print("O email precisa ter @ e não pode ter menos de 8 caracteres.")
-                    return False
+                    return None
 
                 conn = self.conexao.conectar()
                 if conn is None:
@@ -185,6 +187,8 @@ class UsuarioDAO:
                 except oracledb.Error as erro:
                     conn.rollback()
                     print("Houve um erro: ", erro)
+                    return False
+
                 finally:
                     cursor.close()
                     conn.close()
@@ -200,7 +204,7 @@ class UsuarioDAO:
         conn = self.conexao.conectar()
         if conn is None:
             print("Erro ao conectar ao Oracle.")
-            return False
+            return None
         
         cursor = conn.cursor()
         sql = """
@@ -211,6 +215,9 @@ class UsuarioDAO:
         try:
             cursor.execute(sql, {"email": email, "senha": senha})
             usuario_validado = cursor.fetchone()
+
+            if usuario_validado is None:
+                return None
 
             usuario = Usuario(username=usuario_validado[1], senha_user=usuario_validado[2], email_user=usuario_validado[3], pontos=usuario_validado[4],
                               passagens=usuario_validado[5], saldo=usuario_validado[6], vales=usuario_validado[7], limite=usuario_validado[8], id_usuario=usuario_validado[0])
@@ -229,7 +236,7 @@ class UsuarioDAO:
         conn = self.conexao.conectar()
         if conn is None:
             print("Erro ao conectar ao Oracle.")
-            return False
+            return None
 
         cursor = conn.cursor()
 
