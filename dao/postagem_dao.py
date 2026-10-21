@@ -140,7 +140,7 @@ class PostagemDAO:
 
         else:
 
-            confirmacao = input("Você realmente deseja excluir esta postagem? (S para Sim/N para Não)").upper().strip()
+            confirmacao = input("Você realmente deseja excluir esta postagem? (S para Sim/N para Não): ").upper().strip()
             if confirmacao == "N":
                 print("A exclusão foi cancelada com sucesso!")
                 return False

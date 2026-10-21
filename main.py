@@ -433,7 +433,7 @@ while opcao != 0:
                             usuario_atual._saldo = round(usuario_atual._saldo + saldo_ganho, 2)
                             user_dao.atualizar_qtd_pontos(usuario_atual._id_usuario, usuario_atual._pontos)
                             user_dao.atualizar_saldo(usuario_atual._id_usuario, usuario_atual._saldo)
-                            print(f"Você converteu {pontos_para_conversao} em R$ {saldo_ganho:.2f} com sucesso!")
+                            print(f"Você converteu {pontos_para_conversao} pontos em R$ {saldo_ganho:.2f} com sucesso!")
 
                     case 3:
                         print(f"Atualmente, o saldo de seu bilhete é de R$ {usuario_atual._saldo:.2f}.")
@@ -450,7 +450,7 @@ while opcao != 0:
                             user_dao.atualizar_qtd_pontos(usuario_atual._id_usuario, usuario_atual._pontos)
                             user_dao.atualizar_passagens(usuario_atual._id_usuario, usuario_atual._passagens)
                             user_dao.atualizar_limite(usuario_atual._id_usuario, usuario_atual._limite)
-                            print(f"Você converteu {custo_em_pontos} em {passagens_desejadas} passagens com sucesso!")
+                            print(f"Você converteu {custo_em_pontos} pontos em {passagens_desejadas} passagens com sucesso!")
 
                     case 5:
                         print(f"Atualmente, você possui {usuario_atual._passagens} passagem(ns) no bilhete único.")
@@ -643,7 +643,7 @@ while opcao != 0:
                                 print("Limite: ", usuario[8])
 
                     case 5:
-                        username_procurado = validar_texto("Digite o Username da conta que você deseja buscar.")
+                        username_procurado = validar_texto("Digite o Username da conta que você deseja buscar: ")
                         usuario = user_dao.buscar_nome_usuario(username_procurado)
                         if usuario is None:
                             print("Nenhum usuário foi encontrado.")

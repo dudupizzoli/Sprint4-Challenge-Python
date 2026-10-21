@@ -126,7 +126,7 @@ class UsuarioDAO:
                 conn = self.conexao.conectar()
                 if conn is None:
                     print("Erro ao conectar ao Oracle.")
-                    return False
+                    return None
 
                 cursor = conn.cursor()
                 sql = """update usuarios_soulup 
@@ -150,7 +150,7 @@ class UsuarioDAO:
 
             else:
                 print("Senha incorreta. Não foi possível editar o usuário.")
-                return False
+                return None
 
     def excluir_usuario(self, username):
         usuario = self.buscar_nome_usuario(username)
@@ -158,7 +158,7 @@ class UsuarioDAO:
             print("Nenhum usuário foi encontrado.")
             return False
         
-        confirmacao = input("A exclusão de uma conta é uma ação perigosa e potencialmente irreversível. Você realmente deseja excluir esta conta? (S para Sim/N para Não)").upper().strip()
+        confirmacao = input("A exclusão de uma conta é uma ação perigosa e potencialmente irreversível. Você realmente deseja excluir esta conta? (S para Sim/N para Não): ").upper().strip()
         if confirmacao == "N":
             print("A exclusão foi cancelada com sucesso!")
             return False
@@ -265,7 +265,7 @@ class UsuarioDAO:
         conn = self.conexao.conectar()
         if conn is None:
             print("Erro ao conectar ao Oracle.")
-            return False
+            return None
 
         cursor = conn.cursor()
 
