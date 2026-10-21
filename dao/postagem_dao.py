@@ -4,7 +4,7 @@ import oracledb
 class PostagemDAO:
     def __init__(self):
         self.conexao = Conexaodb(
-            usuario="user",
+            usuario="usuario",
             senha="senha",
             host="host",
             porta=1521,

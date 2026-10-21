@@ -10,7 +10,7 @@ import sys
 user_dao = UsuarioDAO()
 post_dao = PostagemDAO()
 
-def validar_texto(mensagem):
+def validar_texto(mensagem): #Função para ler texto
     while True:
         texto = input(mensagem).strip()
         if texto:
@@ -19,7 +19,7 @@ def validar_texto(mensagem):
             print("O campo não pode ficar em branco.")
 
 
-def ler_inteiro(mensagem):
+def ler_inteiro(mensagem): #Função para ler números inteiros
     while True:
         try:
             valor = int(input(mensagem))
@@ -30,7 +30,7 @@ def ler_inteiro(mensagem):
         except ValueError as erro:
             print("Ocorreu um erro: ", erro, ". Digite apenas números válidos.")
 
-def validar_credenciais(email, senha):
+def validar_credenciais(email, senha): #Função para validar email e senha colocados pelo usuário
     if len(senha) < 4 or " " in senha:
         raise ValueError("Sua senha precisa ter ao menos 4 caracteres e nenhum espaço.")
     if "@" not in email or len(email) < 8:
@@ -61,7 +61,7 @@ def conversao_vales(vales):  #Função responsável por converter pontos em desc
     else:
         print("Não é possível converter 0 ou números negativos")
 
-def exportar_json():
+def exportar_json(): #Função para gerar o relatório de usuários em JSON
     try:
         usuarios = user_dao.listar_usuarios()
         if usuarios is None:
@@ -88,7 +88,7 @@ def exportar_json():
     except OSError as erro:
                     print("Ocorreu um erro durante a criação do arquivo: ", erro)
                     
-def exportar_html():
+def exportar_html(): #Função para gerar o relatório de usuários em HTML
     try:
         usuarios = user_dao.listar_usuarios() or []
         num_usuarios = 0
@@ -282,7 +282,7 @@ usuario_atual = None
 login = False
 opcao_login = -1
 
-while not login:
+while not login: #Menu de login, permite a criação de uma conta e o login caso o usuário já possua uma conta
     print("\n=======================================")
     print("Bem-vindo à SoulUp Society!!")
     print("Ainda não possui uma conta? Cadastre-se!")
@@ -348,8 +348,8 @@ while opcao != 0:
     print("2 - Carregar o bilhete único.") #Submenu do bilhete único
     print("3 - Postar.") #Submenu de postagens
     print("4 - Usuário.") #Submenu do usuário
-    print("5 - Criar JSON.")
-    print("6 - Criar HTML.")
+    print("5 - Criar JSON.") #Opção para criar um relatório de usuários em JSON
+    print("6 - Criar HTML.") #Opção para criar um relatório de usuários em HTML
     print("0 - Sair.") #Saída do sistema
     try:
         opcao = int(input("Digite o número da opção que você deseja: "))
