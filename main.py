@@ -6,6 +6,7 @@ from pathlib import Path
 import webbrowser
 from html import escape
 import sys
+import urllib.request
 
 user_dao = UsuarioDAO()
 post_dao = PostagemDAO()
@@ -36,6 +37,36 @@ def validar_credenciais(email, senha): #Função para validar email e senha colo
     if "@" not in email or len(email) < 8:
         raise ValueError("O email precisa ter @ e não pode ter menos de 8 caracteres.")
 
+
+def mostrar_clima_sp(): #Função que chama a API open-meteo para verificação do tempo em São Paulo
+    url = ("https://api.open-meteo.com/v1/forecast?latitude=-23.55&longitude=-46.63"
+           "&current=temperature_2m,apparent_temperature,precipitation"
+           "&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max"
+           "&timezone=America/Sao_Paulo&forecast_days=1")
+    try:
+        with urllib.request.urlopen(url, timeout=5) as resposta:
+            dados = json.load(resposta)
+
+        atual = dados["current"]
+        diario = dados["daily"]
+
+        temperatura = atual["temperature_2m"]
+        sensacao = atual["apparent_temperature"]
+        precipitacao = atual["precipitation"]
+
+        minima = diario["temperature_2m_min"][0]
+        maxima = diario["temperature_2m_max"][0]
+        chance_chuva = diario["precipitation_probability_max"][0]
+
+        print("\n======== Tempo em São Paulo ========")
+        print(f"Temperatura: {temperatura}°C | Sensação Térmica: {sensacao}°C)")
+        print(f"Precipitação atual: {precipitacao} mm")
+        print(f"Chance máxima de chuva hoje: {chance_chuva}%")
+        print(f"Mínima: {minima}°C | Máxima: {maxima}°C")
+
+    except Exception as erro:
+        print("Não foi possível consultar o clima agora.")
+        print("Erro: ", erro)
 
 def conversao_dinheiro(pontos):  #Função responsável por converter pontos em dinheiro, tanto para a simulação quanto para o bilhete único em si
     #Recebe como parâmetro a quantidade de pontos inserida pelo usuário, verifica sua validade, e então retorna o valor em dinheiro
@@ -350,6 +381,7 @@ while opcao != 0:
     print("4 - Usuário.") #Submenu do usuário
     print("5 - Criar JSON.") #Opção para criar um relatório de usuários em JSON
     print("6 - Criar HTML.") #Opção para criar um relatório de usuários em HTML
+    print("7 - Consultar tempo.")
     print("0 - Sair.") #Saída do sistema
     try:
         opcao = int(input("Digite o número da opção que você deseja: "))
@@ -718,6 +750,9 @@ while opcao != 0:
             print("\nEsta opção irá gerar um relatório .html sobre os usuários já cadastrados na SoulUp Society.")
             print("Gerando relatório...")
             exportar_html()
+
+        case 7:
+            mostrar_clima_sp()
 
 
         case 0:
